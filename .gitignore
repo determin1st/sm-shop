@@ -1,6 +1,7 @@
 node_modules/
 todo/
 inc/httpFetch
+inc/carbon-fields
 inc/gsap
 *.vim
 *.swp
