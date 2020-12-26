@@ -1,0 +1,24 @@
+// .editor-styles-wrapper
+.wp-block
+{
+  // увеличинная ширина для редактора
+  max-width: 1080px;
+  &[data-align="wide"]
+  {
+    max-width: 1280px;
+  }
+  &[data-align="full"]
+  {
+    max-width: none;
+  }
+  // параграф
+  p.wp-block-paragraph {
+    //text-indent: 24px;
+  }
+  // разделительная линия
+  hr.wp-block-separator {
+    //max-width: 100%;
+  }
+}
+
+// vim: fdm=marker ts=2 sts=2 sw=2 :
