@@ -1,20 +1,29 @@
 /*
-Theme Name: storefront-sm
+Theme Name: sm-shop
 Template: storefront
 Version: 1.0
 */
 @font-face {
   font-family: 'RistrettoPro';
-  src: url('fonts/RistrettoPro-Regular.woff2') format('woff2'), url('fonts/RistrettoPro-Regular.woff') format('woff');
+  src: url('inc/fonts/RistrettoPro-Regular.woff2') format('woff2'), url('inc/fonts/RistrettoPro-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Source Sans Pro';
-  src: url('fonts/SourceSansPro-Regular.woff2') format('woff2'), url('fonts/SourceSansPro-Regular.woff') format('woff');
+  src: url('inc/fonts/SourceSansPro-Regular.woff2') format('woff2'), url('inc/fonts/SourceSansPro-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
 }
+/***
+@font-face
+	font-family: 'TradeWinds'
+	font-display: fallback
+	src: local('Trade Winds'),
+	     url('TradeWinds.woff2') format('woff2'),
+	     url('TradeWinds.woff') format('woff'),
+	     url('TradeWinds.ttf') format('truetype');
+/***/
 html,
 body {
   margin: 0;
@@ -24,6 +33,7 @@ body {
   min-width: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
+  scroll-behavior: smooth;
 }
 body {
   --color-highlight: hsl(29, 100%, 55%);

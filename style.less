@@ -1,26 +1,34 @@
 /*
-Theme Name: storefront-sm
+Theme Name: sm-shop
 Template: storefront
 Version: 1.0
 */
 // fonts {{{
 @font-face {
     font-family: 'RistrettoPro';
-    src: url('fonts/RistrettoPro-Regular.woff2') format('woff2'),
-         url('fonts/RistrettoPro-Regular.woff') format('woff');
+    src: url('inc/fonts/RistrettoPro-Regular.woff2') format('woff2'),
+         url('inc/fonts/RistrettoPro-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
     font-family: 'Source Sans Pro';
-    src: url('fonts/SourceSansPro-Regular.woff2') format('woff2'),
-         url('fonts/SourceSansPro-Regular.woff') format('woff');
+    src: url('inc/fonts/SourceSansPro-Regular.woff2') format('woff2'),
+         url('inc/fonts/SourceSansPro-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
-
+/***
+@font-face
+	font-family: 'TradeWinds'
+	font-display: fallback
+	src: local('Trade Winds'),
+	     url('TradeWinds.woff2') format('woff2'),
+	     url('TradeWinds.woff') format('woff'),
+	     url('TradeWinds.ttf') format('truetype');
+/***/
 // }}}
-// basic {{{
+// base {{{
 html, body
 {
   margin: 0;
@@ -30,15 +38,14 @@ html, body
   min-width: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
+  scroll-behavior: smooth;
 }
-// }}}
-
 body {
-  // индивидуальная конфигурация в зависимости от домена
   // по-умолчанию
   --color-highlight:       hsla(29, 100%, 55%, 1);
   --color-highlight-faded: hsla(29, 100%, 55%, 0.1);
   --color-highlight-dark:  hsla(29, 100%, 35%, 1);
+  // индивидуальная конфигурация
   &.rutecpro-ru
   {
     --color-highlight:       hsla(292, 100%, 55%, 1);
@@ -52,7 +59,9 @@ body {
     --color-highlight-dark:  hsla(250, 100%, 35%, 1);
   }
 }
-#page {
+// }}}
+#page
+{
   // интерфейс
   // общие цвета
   @color-layer: hsla(0, 0%, 94%, 1);
