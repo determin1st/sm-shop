@@ -1,8 +1,8 @@
 <?php # shop template
 defined( 'ABSPATH' ) || exit;
-###
 # generate markup
-$o = <<<EOD
+ob_start();
+?>
 
 <div id="sm-shop">
   <div class="body">
@@ -52,7 +52,8 @@ $o = <<<EOD
   </div>
 </div>
 
-EOD;
+<?php
+$o = ob_get_clean();
 # output
 get_header('shop');
 echo StorefrontModernBlocks::parse($o);

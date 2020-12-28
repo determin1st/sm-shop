@@ -197,7 +197,9 @@ window.addEventListener('load', function(){
   })();
   (function(){
     var root, link, svg, cnt, anim;
-    root = document.querySelector('.site-cart');
+    if (!(root = document.querySelector('.site-cart'))) {
+      return;
+    }
     link = root.querySelector('a');
     svg = link.querySelector('svg');
     cnt = link.querySelector('div > div');

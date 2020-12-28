@@ -17,10 +17,12 @@ class StorefrontModern {
     $ERROR = '',  # theme fatal error message
     # current page flags
     $isLoaded      = false, # theme ready state
-    $isGutenberg   = false,
     $isAdmin       = false,
+    $isGutenberg   = false,
+    $isCustomizer  = false,
     $isAccountPage = false,
     $isFrontPage   = false,
+    $isCart        = false,
     $isShop        = false;
   public static
     $icons = [ # {{{
@@ -66,19 +68,23 @@ class StorefrontModern {
     # initialize {{{
     $I = $this;
     $I->URI = get_stylesheet_directory_uri();
-    $I->isGutenberg = function_exists('register_block_type');
     $I->isAdmin = is_admin();
+    $I->isGutenberg = function_exists('register_block_type');
+    $I->isCustomizer = is_customize_preview();
     if (class_exists('WooCommerce', false) &&
         class_exists('StorefrontModernBlocks', false))
     {
       $I->isLoaded = true;
-      $I->isAccountPage = is_account_page();
-      $I->isFrontPage = is_front_page();
-      $I->isShop = is_shop();
-      ###
-      if ($I->isShop) {
-        StorefrontModernBlocks::init();
-      }
+      add_action('wp', function() use ($I) {
+        ###
+        $I->isAccountPage = is_account_page();
+        $I->isFrontPage   = is_front_page();
+        $I->isCart        = is_cart();
+        $I->isShop        = is_shop();
+        if ($I->isShop) {
+          StorefrontModernBlocks::init();
+        }
+      });
     }
     # }}}
     # tune storefront (parent theme) and woocommerce {{{
@@ -120,8 +126,6 @@ class StorefrontModern {
     # storefront_primary_navigation_wrapper_close - 68
     # }}}
     remove_action('storefront_header', 'storefront_secondary_navigation', 30);
-    remove_action('storefront_header', 'storefront_product_search', 40);
-    remove_action('storefront_header', 'storefront_header_cart', 60);
     add_action('storefront_header', function() {
       # contacts {{{
       $a = get_theme_mod('header_phone', '+7 800 123-45-67');
@@ -173,7 +177,9 @@ EOD;
 EOD;
       # }}}
     }, 33);
-    add_action('storefront_header', function() {
+    remove_action('storefront_header', 'storefront_product_search', 40);
+    false && remove_action('storefront_header', 'storefront_header_cart', 60);
+    false && add_action('storefront_header', function() {
       # mini-cart {{{
       $url = wc_get_cart_url();
       $cnt = WC()->cart->get_cart_contents_count();
@@ -859,11 +865,12 @@ EOD;
   return $html;
 }
 function storefront_primary_navigation() {
-  # копия оригинальной функции за исключением Walker'a
-  ?>
+?>
+
   <nav id="site-navigation" class="main-navigation" role="navigation" aria-label="<?php esc_html_e( 'Primary Navigation', 'storefront' ); ?>">
   <button class="menu-toggle" aria-controls="site-navigation" aria-expanded="false"><span><?php echo esc_attr( apply_filters( 'storefront_menu_toggle_text', __( 'Menu', 'storefront' ) ) ); ?></span></button>
-    <?php
+
+<?php
     wp_nav_menu(
       array(
         'theme_location'  => 'primary',
@@ -877,49 +884,11 @@ function storefront_primary_navigation() {
         'container_class' => 'handheld-navigation',
       )
     );
-    ?>
+?>
+
   </nav><!-- #site-navigation -->
-  <?php
-}
-function storefront_credit()
-{
-  $links_output = '';
-  if (apply_filters('storefront_credit_link', true)) {
-    $links_output .= '<a href="https://woocommerce.com" target="_blank" rel="noreferrer" title="'.esc_attr__('WooCommerce - The Best eCommerce Platform for WordPress', 'storefront').'" rel="author">'.esc_html__('Built with Storefront &amp; WooCommerce', 'storefront').'</a>.';
-  }
-  if (apply_filters('storefront_privacy_policy_link', true) && function_exists('the_privacy_policy_link')) {
-    $separator = '<span role="separator" aria-hidden="true"></span>';
-    $links_output = get_the_privacy_policy_link( '', ( ! empty( $links_output ) ? $separator : '' ) ) . $links_output;
-  }
-  $links_output = apply_filters('storefront_credit_links_output', $links_output);
-  $copyright = esc_html(apply_filters('storefront_copyright_text', $content = '&copy; '.get_bloginfo('name').' '.date('Y')));
-  echo <<<EOD
 
-  <div class="site-info">
-    {$copyright}<br>
-    {$links_output}
-  </div>
-
-EOD;
-}
-function storefront_page_header() {
-  global $modernStore;
-  ###
-  # не отображаем заголовок
-  if (($modernStore->isFrontPage && is_page_template('template-fullwidth.php')) ||
-      $modernStore->isAccountPage)
-  {
-    return;
-  }
-  # вывод
-  ?>
-  <header class="entry-header">
-    <?php
-    storefront_post_thumbnail('full');
-    the_title( '<h1 class="entry-title">', '</h1>');
-    ?>
-  </header><!-- .entry-header -->
-  <?php
+<?php
 }
 # }}}
 # load hook {{{

@@ -1,4 +1,4 @@
-#sm-page
+#sm-shop
 	font-size: calc(var(--sm-blocks-height) * var(--sm-blocks-factor))
 	width: 100%
 	padding: 0 4px 0 4px

@@ -220,8 +220,9 @@ window.addEventListener 'load', !->
 		window.dispatchEvent (new Event 'resize')
 	# }}}
 	do !-> # корзина {{{
-		# подготовка
-		root = document.querySelector '.site-cart'
+		# prepare
+		if not (root = document.querySelector '.site-cart')
+			return
 		link = root.querySelector 'a'
 		svg  = link.querySelector 'svg'
 		cnt  = link.querySelector 'div > div'
