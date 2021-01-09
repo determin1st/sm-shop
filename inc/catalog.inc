@@ -1,5 +1,5 @@
 <?php # shop template
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 # generate markup
 ob_start();
 ?>

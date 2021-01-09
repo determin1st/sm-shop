@@ -1,9 +1,8 @@
 <?php
-# проверка
-if (!defined('ABSPATH')) {
-  exit;
-}
-# подготовка
+# {{{
+###
+wp_enqueue_style('sm-shop-login');
+###
 $isRegEnabled = (get_option('woocommerce_enable_myaccount_registration') === 'yes');
 $regEmail = '';
 $regGenPassword = false;
@@ -16,8 +15,7 @@ if ($isRegEnabled)
     $regGenPassword = true;
   }
 }
-$userName = empty($_POST['username']) ?
-  '' : esc_attr(wp_unslash($_POST['username']));
+$userName = empty($_POST['username']) ? '' : esc_attr(wp_unslash($_POST['username']));
 $text = [
   'username'      => __('Username or email address', 'woocommerce'),
   'password'      => __('Password', 'woocommerce'),
@@ -39,10 +37,10 @@ else {
   $classReg .= ' hidden';
   $title = $text['loginTitle'];
 }
-# вызываем обработчик
+###
 do_action('woocommerce_before_customer_login_form');
+# }}}
 ?>
-
 
 <div id="customer_login"><div>
   <div class="title"><h2><?php echo $title;?></h2></div>

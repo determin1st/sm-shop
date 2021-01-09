@@ -1,0 +1,752 @@
+/**
+* Theme layout and styles
+*/
+@font-face {
+  font-family: "Montserrat";
+  font-weight: 800;
+  font-style: normal;
+  src: url("fonts/Montserrat-ExtraBold.woff2") format("woff2"), url("fonts/Montserrat-ExtraBold.woff") format("woff");
+}
+@font-face {
+  font-family: "Kazmann";
+  font-weight: 400;
+  font-style: normal;
+  src: url("fonts/Kazmann Sans.woff2") format("woff2"), url("fonts/Kazmann Sans.woff") format("woff");
+}
+/***
+@font-face
+	font-family: 'TradeWinds'
+	font-display: fallback
+	src: local('Trade Winds'),
+	     url('TradeWinds.woff2') format('woff2'),
+	     url('TradeWinds.woff') format('woff'),
+	     url('TradeWinds.ttf') format('truetype');
+/***/
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  scroll-behavior: smooth;
+}
+body {
+  --sm-color-0: 0,0,0;
+  --sm-color-1: 255,255,255;
+  --sm-color-2: 192,192,192;
+  --sm-color-3: 220,220,220;
+  --sm-color-4: 47,79,79;
+  --sm-color-5: 112,128,144;
+  --sm-color-6: 72,61,139;
+  --sm-color-7: 106,90,205;
+}
+body .inputbox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 4px;
+}
+body .inputbox > label {
+  order: 1;
+  display: block;
+  font-weight: bold;
+  color: ;
+  white-space: nowrap;
+}
+body .inputbox > input,
+body .inputbox > select,
+body .inputbox > textarea {
+  order: 2;
+  display: block;
+  width: 100%;
+  height: 48px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 8px;
+  border-width: 0;
+  border-top: 1px solid;
+  box-shadow: inset 0 1px 2px;
+  border-radius: 2px;
+  background-color: ;
+  color: #000;
+  font-weight: bold;
+}
+body .inputbox > input:focus,
+body .inputbox > select:focus,
+body .inputbox > textarea:focus {
+  outline: none;
+  border-color: rgba(var(--sm-color-6),1);
+  box-shadow: inset 0 1px 1px rgba(var(--sm-color-7),1);
+}
+body .inputbox > input:focus ~ label,
+body .inputbox > select:focus ~ label,
+body .inputbox > textarea:focus ~ label {
+  color: rgba(var(--sm-color-7),1);
+}
+body .inputbox > input:disabled,
+body .inputbox > select:disabled,
+body .inputbox > textarea:disabled {
+  background-color: transparent;
+  border-style: none;
+  border-bottom-style: solid;
+  border-radius: 0;
+}
+body .inputbox > input::placeholder,
+body .inputbox > select::placeholder,
+body .inputbox > textarea::placeholder {
+  color: ;
+}
+body .inputbox > textarea {
+  height: auto;
+}
+body .inputbox.readonly > input,
+body .inputbox.readonly > select,
+body .inputbox.readonly > textarea {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  background-color: transparent;
+}
+body .inputbox.readonly > input:focus,
+body .inputbox.readonly > select:focus,
+body .inputbox.readonly > textarea:focus {
+  box-shadow: inset 0 -4px 6px -6px #8c99a6;
+}
+body .inputbox.readonly > input::placeholder,
+body .inputbox.readonly > select::placeholder,
+body .inputbox.readonly > textarea::placeholder {
+  color: transparent;
+}
+body .inputbox.hidden {
+  display: none;
+}
+body .inputbox.required > label:before {
+  color: #f00;
+  content: '*';
+}
+body .checkbox {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  padding: 8px 0;
+}
+body .checkbox > input {
+  display: block;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+  margin: 0;
+  cursor: pointer;
+}
+body .checkbox > input:checked ~ label {
+  color: #000;
+}
+body .checkbox > input:focus {
+  outline: none;
+}
+body .checkbox > input:focus ~ label {
+  color: #33f;
+}
+body .checkbox > label {
+  font-size: 16px;
+  font-weight: bold;
+  padding-left: 8px;
+  color: #6f7f90;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+}
+body .cmdbox {
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+/***
+		&.ripple-effect > button:enabled
+		{
+			background-position: center;
+			transition: background 0.5s;
+			&:hover
+			{
+				background: hsl(240, 100%, 95%) radial-gradient(circle, transparent 1%, hsl(240, 100%, 95%) 1%) center/15000%;
+			}
+			&:active
+			{
+				background-color: hsl(210, 13%, 50%);
+				background-size: 100%;
+				transition: background 0s;
+			}
+		}
+		/***/
+}
+body .cmdbox > button {
+  width: 100%;
+  height: 64px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid;
+  border-radius: 2px;
+  background-color: #000;
+  background-position: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+}
+body .cmdbox > button:hover {
+  border-width: 2px;
+  border-color: rgba(var(--sm-color-6),1);
+}
+body .cmdbox > button:focus {
+  border-width: 3px;
+  border-color: rgba(var(--sm-color-6),1);
+}
+body .cmdbox > button:active {
+  color: rgba(var(--sm-color-6),1);
+}
+body .cmdbox > button:disabled {
+  cursor: default;
+}
+body .cmdbox > button.hidden {
+  display: none;
+}
+body .cmdbox.light > button {
+  background-color: ;
+  border-color: ;
+  color: #000;
+}
+body .cmdbox.light > button:hover {
+  border-color: rgba(var(--sm-color-6),1);
+}
+body .cmdbox.light > button:focus {
+  border-color: rgba(var(--sm-color-6),1);
+}
+body .cmdbox.light > button:active {
+  color: rgba(var(--sm-color-6),1);
+  background-color: rgba(var(--sm-color-6),0.125);
+}
+body .groupbox {
+  padding: 6px 0 4px 0;
+}
+body .groupbox > .checkbox {
+  padding: 0 0 4px 0;
+}
+body .groupbar {
+  display: flex;
+}
+body .groupbar > .inputbox {
+  flex: 1 1 0;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+body .groupbar > .inputbox.w2 {
+  flex: 2 2 0;
+}
+body .groupbar > .inputbox.w3 {
+  flex: 3 3 0;
+}
+body .groupbar > .inputbox.w4 {
+  flex: 4 4 0;
+}
+body .groupbar > .inputbox.w5 {
+  flex: 5 5 0;
+}
+body .groupbar > .inputbox.w6 {
+  flex: 6 6 0;
+}
+body .groupbar > .inputbox.w7 {
+  flex: 7 7 0;
+}
+body .groupbar > .inputbox.w8 {
+  flex: 8 8 0;
+}
+body .groupbar > .inputbox.w9 {
+  flex: 9 9 0;
+}
+body .groupbar > .inputbox:nth-child(1) {
+  padding-left: 0;
+}
+body .groupbar > .inputbox:nth-last-child(1) {
+  padding-right: 0;
+}
+body > .head {
+  display: block;
+}
+#site-header-cart {
+  width: 260px;
+}
+#page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+#page input,
+#page select,
+#page a {
+  outline-color: rgba(var(--sm-color-6),1);
+}
+#page > header {
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: transparent;
+}
+#page > header > div.col-full {
+  display: flex;
+  align-items: center;
+  height: 120px;
+}
+#page > header > div.col-full > * {
+  height: 100%;
+}
+#page > header > div.col-full > .site-branding {
+  flex: 0 1 auto;
+  float: none;
+  margin: 0;
+  width: auto;
+}
+#page > header > div.col-full > .site-branding > a.site-title {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  outline: none;
+}
+#page > header > div.col-full > .site-branding > a.site-title > img,
+#page > header > div.col-full > .site-branding > a.site-title > svg {
+  flex: 0 0 auto;
+  height: 100%;
+  max-height: 400px;
+  padding: 10px;
+}
+#page > header > div.col-full > .site-branding > a.site-title > svg .str0 {
+  stroke: #fff;
+  stroke-width: 5;
+}
+#page > header > div.col-full > .site-branding > a.site-title > svg .fil0 {
+  fill: #000;
+}
+#page > header > div.col-full > .site-branding > a.site-title > svg .fil1 {
+  fill: #fff;
+}
+#page > header > div.col-full > .site-branding > a.site-title > svg .fil2 {
+  fill: none;
+}
+#page > header > div.col-full > .site-branding > a.site-title > svg .fil3 {
+  fill: rgba(var(--sm-color-6),1);
+}
+#page > header > div.col-full > .site-branding > a.site-title > p {
+  flex: 1 1 auto;
+  display: none;
+}
+#page > header > div.col-full > .site-contacts {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+}
+#page > header > div.col-full > .site-contacts > a {
+  outline: none;
+  padding: 2px 8px 2px 0;
+}
+#page > header > div.col-full > .site-contacts > a > svg {
+  height: 36px;
+  fill: #000;
+}
+#page > header > div.col-full > .site-contacts > p {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 1em;
+}
+#page > header > div.col-full > .site-search {
+  flex: 1 1;
+  width: auto;
+  float: none;
+  margin: 0;
+  padding-left: 8px;
+}
+#page > header > div.col-full > .site-search > div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#page > header > div.col-full > .site-minimenu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  padding-left: 8px;
+}
+#page > header > div.col-full > .site-logout {
+  width: 120px;
+  height: 120px;
+  padding: 20px;
+  display: block;
+}
+#page > header > div.col-full > .site-logout > svg {
+  fill: #2f4f4f;
+}
+#page .storefront-primary-navigation > .col-full {
+  display: flex;
+  min-height: 54px;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation {
+  flex: 1 1 100%;
+  width: 100%;
+  margin: 0;
+  float: none;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .menu-toggle {
+  width: 100%;
+  max-width: 100%;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: ;
+  border-style: none;
+  border-top: 1px solid rgba(var(--sm-color-6),1);
+  outline: none;
+  font-family: 'RistrettoPro';
+  font-size: 1.8em;
+  font-weight: normal;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .menu-toggle:hover {
+  background-color: rgba(var(--sm-color-6),0.125);
+  color: rgba(var(--sm-color-6),1);
+  font-size: 1.82em;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .handheld-navigation {
+  width: 100%;
+  border-bottom: 1px solid rgba(var(--sm-color-6),1);
+  background-color: ;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .handheld-navigation > .menu {
+  padding: 4px 16px;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .handheld-navigation > .menu li > a {
+  font-family: 'RistrettoPro';
+  font-size: 1.6em;
+  padding: 4px 0 4px 8px;
+  outline: none;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .handheld-navigation > .menu li > a:hover {
+  background-color: rgba(var(--sm-color-6),0.125);
+  color: rgba(var(--sm-color-6),1);
+  font-size: 1.65em;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .handheld-navigation > .menu li > button {
+  background-color: ;
+  border: 1px solid rgba(var(--sm-color-6),1);
+  border-radius: 100%;
+  outline: none;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .handheld-navigation > .menu li > button:hover {
+  background-color: rgba(var(--sm-color-6),0.125);
+  color: rgba(var(--sm-color-6),1);
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation {
+  height: 100%;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu {
+  flex: 1 1 auto;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu a {
+  display: flex;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 0 0 12px;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > a {
+  flex: 1 1 100%;
+  padding: 0 4px;
+  color: #000;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > a > div {
+  display: flex;
+  align-items: center;
+  font-family: 'RistrettoPro';
+  font-size: 1.6em;
+  padding: 0;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > a > svg {
+  width: 0;
+  height: auto;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > a::after {
+  display: none;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li.current-menu-item > a > div,
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li.current-menu-ancestor > a > div {
+  font-size: 2em;
+  font-weight: bold;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li.menu-item-has-children > a > svg {
+  width: 20px;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > hr {
+  visibility: hidden;
+  margin: 0;
+  width: 100%;
+  height: 5px;
+  background-color: rgba(var(--sm-color-6),1);
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li.current-menu-item > hr,
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li.current-menu-ancestor > hr {
+  visibility: visible;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown {
+  position: absolute;
+  left: -8px;
+  top: calc(100% + 2px);
+  width: 380px;
+  padding: 8px 10px;
+  background-color: ;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--sm-color-6),1);
+  visibility: hidden;
+  opacity: 0;
+  z-index: 100;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a {
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 8px;
+  background-color: transparent;
+  border-radius: 2px;
+  height: 2.4em;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a > svg {
+  padding: 0;
+  height: 18px;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a > div {
+  font-family: 'RistrettoPro';
+  font-size: 1.6em;
+  padding: 0;
+  color: #000;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a:hover,
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a.hovered {
+  background-color: rgba(var(--sm-color-6),0.125);
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a:hover > div,
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a.hovered > div {
+  color: rgba(var(--sm-color-6),1);
+  font-size: 1.7em;
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > a.current-menu-item > div {
+  letter-spacing: 0.05em;
+  font-weight: bold;
+  color: rgba(var(--sm-color-6),1);
+}
+#page .storefront-primary-navigation > .col-full > .main-navigation > .primary-navigation > .menu > li > .dropdown > h3 {
+  font-family: 'RistrettoPro';
+  font-size: 1.7em;
+  font-weight: bold;
+  color: #000;
+  margin: 0;
+  padding: 0 0 0 8px;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart {
+  flex: 0 1 auto;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a {
+  display: flex;
+  align-items: center;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a > div {
+  position: relative;
+  padding: 8px;
+  cursor: pointer;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a > div > svg {
+  height: 40px;
+  fill: #000;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a > div > div {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a > div > div > span {
+  display: block;
+  background-color: rgba(var(--sm-color-6),1);
+  border-radius: 100%;
+  line-height: 20px;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a > div > div > span.hidden {
+  visibility: hidden;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart > a > span {
+  color: #000;
+  font-weight: bold;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart.is-current > a {
+  cursor: default;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart.is-current > a > div > svg {
+  fill: rgba(var(--sm-color-6),1);
+}
+#page .storefront-primary-navigation > .col-full > .site-cart.is-current > a > div > div {
+  visibility: hidden;
+}
+#page .storefront-primary-navigation > .col-full > .site-cart.is-current > a > span {
+  display: none;
+}
+#page > .storefront-breadcrumb {
+  margin: 0;
+  padding: 1em 0;
+}
+#page > .storefront-breadcrumb nav {
+  font-size: 0.7em;
+  font-style: italic;
+}
+#page > .storefront-breadcrumb nav a {
+  text-decoration: none;
+}
+#page #content > div {
+  max-width: 100%;
+  margin: 0;
+}
+#page #content article h1,
+#page #content article h2,
+#page #content article h3 {
+  font-family: 'RistrettoPro';
+  text-align: left;
+  margin: 0;
+}
+#page #content article h1 {
+  font-size: 4em;
+  line-height: 0.85em;
+  margin-bottom: 0.1em;
+}
+#page #content article h2,
+#page #content article h3 {
+  font-size: 2.2em;
+  padding-left: 0.5em;
+}
+#page #content article p {
+  font-size: 1em;
+  padding-left: 1.6em;
+  margin: 0 0 0.8em;
+}
+#page #content article p.nopad {
+  padding-left: 0;
+}
+#page #content article p.indent {
+  text-indent: 0.8em;
+}
+#page #content ul.products .button {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: ;
+  color: #000;
+  border: 1px solid;
+  border-radius: 4px;
+  transition: All 0.4s ease;
+}
+#page #content ul.products .button:hover {
+  background-color: #fff;
+  color: rgba(var(--sm-color-6),1);
+  border-color: rgba(var(--sm-color-6),1);
+}
+#page #content form.checkout .woocommerce-billing-fields,
+#page #content form.checkout .woocommerce-additional-fields {
+  display: flex;
+  flex-direction: column;
+}
+#page #content form.checkout .woocommerce-billing-fields > div,
+#page #content form.checkout .woocommerce-additional-fields > div {
+  width: 100%;
+  padding-left: 1.6em;
+}
+#page #content > .col-full > .content-area {
+  width: 100%;
+  margin: 0;
+}
+#page #content > .col-full > .widget-area {
+  display: none;
+}
+#page #content .woocommerce-error {
+  margin: 0;
+}
+#page #main > .shop-controls {
+  display: flex;
+}
+#page #main > .shop-controls > .sm-category-filter {
+  max-width: 400px;
+}
+#page > footer {
+  min-height: 80px;
+  padding: 20px 0 0 0;
+}
+#page > footer .site-info {
+  padding: 0;
+  white-space: nowrap;
+}
+#page .modern-link > a {
+  display: flex;
+  padding: 0 4px;
+  color: #000;
+}
+#page .modern-link > a > div {
+  display: flex;
+  align-items: center;
+  font-family: 'RistrettoPro';
+  font-size: 1.6em;
+  color: #000;
+  white-space: nowrap;
+  padding: 0;
+}
+#page .modern-link > hr {
+  opacity: 0;
+  margin: 0;
+  width: 100%;
+  height: 5px;
+  background-color: rgba(var(--sm-color-6),1);
+}
+#page .modern-link.noscript > a > div {
+  transition: font 0.3s ease-out;
+}
+#page .modern-link.noscript > hr {
+  transition: opacity 0.3s ease-out;
+}
+#page .modern-link.noscript:hover > a > div {
+  font-weight: bold;
+}
+#page .modern-link.noscript:hover > hr {
+  opacity: 1;
+}
+#page .modern-link.is-current > a > div {
+  font-size: 2em;
+  font-weight: bold;
+}
+#page .modern-link.is-current > hr {
+  opacity: 1;
+}
