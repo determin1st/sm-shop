@@ -1,5 +1,5 @@
-#sm-shop
-	font-size: calc(var(--sm-blocks-height) * var(--sm-blocks-factor))
+#catalog
+	font-size: calc(var(--sm-size-height) * var(--sm-size-factor))
 	width: 100%
 	padding: 0 4px 0 4px
 	////
@@ -34,7 +34,7 @@
 	> .body
 		display: block
 		> .ctl // {{{
-			font-size: calc(var(--sm-blocks-height) * var(--sm-blocks-factor))
+			font-size: calc(var(--sm-size-height) * var(--sm-size-factor))
 			height: calc(1em + 8px)
 			display: flex
 			flex-direction: row

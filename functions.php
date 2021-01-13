@@ -11,7 +11,7 @@ class StorefrontModern {
   public
     $URI   = '',  # URI of the theme
     $ERROR = '',  # fatal error message
-    # current page flags
+    ###
     $isCharged     = false, # theme ready
     $isAdmin       = false,
     $isGutenberg   = false,
@@ -19,6 +19,7 @@ class StorefrontModern {
     $isAccountPage = false,
     $isFrontPage   = false,
     $isCart        = false,
+    $isProduct     = false,
     $isShop        = false;
   public static
     $icons = [ # {{{
@@ -58,15 +59,9 @@ class StorefrontModern {
     ],
     # }}}
     $scripts = [ # {{{
-      ['index', ['gsap']],
-      ['catalog', ['sm-blocks']],
-      ['login', ['gsap']],
-    ],
-    # }}}
-    $styles = [ # {{{
-      'index',
-      'catalog',
-      'login',
+      ['index',   ['gsap', 'sm-blocks']],
+      ['auth',    ['sm-index']],
+      ['catalog', ['sm-index']],
     ];
     # }}}
   # }}}
@@ -110,18 +105,62 @@ class StorefrontModern {
       $I->isAccountPage = is_account_page();
       $I->isFrontPage   = is_front_page();
       $I->isCart        = is_cart();
-      $I->isShop        = is_shop();
-      if ($I->isShop) {
+      $I->isProduct     = (is_product() || is_product_category() || is_product_tag());
+      if ($I->isShop = is_shop())
+      {
         StorefrontModernBlocks::init();
       }
       add_action('wp_enqueue_scripts', function() use ($I) {
         $I->enqueue();
       });
+      /***
+      global $wp_query;
+      ###
+      # инициализация параметров блога
+      # определим идентификатор основной страницы блога
+      while (($a = get_option('page_for_posts')) !== false)
+      {
+        # сохраняем как число
+        $this->wp_blog_id = $a = intval($a);
+        # определим идентификатор текущего объекта
+        if (($b = $wp_query->get_queried_object_id()) === 0) {
+          break;
+        }
+        # получаем данные
+        if (($b = get_post($b)) === null) {
+          break;
+        }
+        # определим является ли объект постом блога
+        if ($b->ID !== $a && $b->post_type === 'post') {
+          $this->wp_blog_active = true;
+        }
+        break;
+      }
+      /***/
     });
     $I->isCharged = true;
     # }}}
+    # register scripts and styles {{{
+    # external
+    # these scripts are separate projects that may be stored
+    # locally (same-origin) or remotely (cdn)
+    wp_register_script(
+      'gsap',
+      (file_exists(__DIR__.'/inc/gsap')
+        ? $I->URI.'/inc/gsap/gsap.min.js'
+        : 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.6/gsap.min.js'),
+      [], false, true
+    );
+    # internal
+    foreach (self::$scripts as $a)
+    {
+      $b = $I->URI.'/inc/'.$a[0];
+      wp_register_script('sm-'.$a[0], $b.'.js', $a[1], false, true);
+      wp_register_style('sm-'.$a[0], $b.'.css', $a[1]);
+    }
+    # }}}
     # set theme features {{{
-    add_theme_support('woocommerce');
+    #add_theme_support('woocommerce');
     /***
     add_theme_support('woocommerce', [
       'thumbnail_image_width' => 150,
@@ -136,10 +175,10 @@ class StorefrontModern {
       ],
     ]);
     /***/
-    add_theme_support('editor-styles');
-    add_editor_style('inc/admin-editor.css');
+    #add_theme_support('editor-styles');
+    #add_editor_style('inc/admin-editor.css');
     register_nav_menus([
-      'primary' => 'Primary menu',
+      'sm-menu' => 'sm-shop menu',
     ]);
     ###
     ###
@@ -184,29 +223,6 @@ class StorefrontModern {
       }
       return true;
     }, 10, 2);
-    # }}}
-    # register scripts and styles {{{
-    # some scripts are separate projects that may be included
-    # locally (from the same-origin) or remotely (from cdn)
-    wp_register_script(
-      'gsap',
-      (file_exists(__DIR__.'/inc/gsap')
-        ? $I->URI.'/inc/gsap/gsap.min.js'
-        : 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.6/gsap.min.js'),
-      [], false, true
-    );
-    # internal
-    foreach (self::$scripts as $a)
-    {
-      wp_register_script(
-        'sm-shop-'.$a[0],
-        $I->URI.'/inc/'.$a[0].'.js',
-        $a[1], false, true
-      );
-    }
-    foreach (self::$styles as $a) {
-      wp_register_style('sm-shop-'.$a, $I->URI.'/inc/'.$a.'.css');
-    }
     # }}}
     # tune wordpress environment {{{
     # disable rss-feed in <head>
@@ -318,25 +334,39 @@ class StorefrontModern {
     # tidy gaps and complete
     return preg_replace('/>\s+</', '><', $html);
   }
+  public static function menu()
+  {
+    return wp_nav_menu([
+      'menu'            => 'sm-menu',
+      'menu_id'         => '',
+      'menu_class'      => '',
+      'container'       => 'div',
+      'container_id'    => '',
+      'container_class' => 'sm-menu',
+      'walker'          => new StorefrontModernMenu(self::$I),
+      'echo'            => false,
+      'items_wrap'      => '<div>%3$s</div>',
+    ]);
+  }
   # }}}
   # enqueue scripts and styles {{{
   private function enqueue()
   {
-    wp_enqueue_script('sm-shop-index');
-    wp_enqueue_style('sm-shop-index');
-    if ($I->isShop)
+    if (!is_user_logged_in())
     {
-      wp_enqueue_script('sm-shop-catalog');
-      wp_enqueue_style('sm-shop-catalog');
+      wp_enqueue_script('sm-auth');
+      wp_enqueue_style('sm-auth');
     }
-    ###
-    /***
-    if ($me->isFrontPage)
+    else if ($this->isShop)
     {
-      wp_enqueue_style('flickity-css', $d.'/inc/flickity/flickity.min.css');
-      wp_enqueue_script('flickity-js', $d.'/inc/flickity/flickity.pkgd.min.js');
+      wp_enqueue_script('sm-catalog');
+      wp_enqueue_style('sm-catalog');
     }
-    /***/
+    else
+    {
+      wp_enqueue_script('sm-index');
+      wp_enqueue_style('sm-index');
+    }
   }
   # }}}
   # multi-domain {{{
@@ -420,16 +450,10 @@ class StorefrontModern {
   # }}}
 }
 class StorefrontModernMenu extends Walker_Nav_Menu {
-  # {{{
-  # данные {{{
-  # woocommerce
-  private $wc_active      = false;
-  private $wc_shop_active = false;
-  private $wc_shop_id     = 0;
-  # блог
-  private $wp_blog_active = false;
-  private $wp_blog_id     = 0;
-  # иконки
+  # constructor {{{
+  private
+    $I = null,
+    $shop_id = -1;
   public $svg = [
     # маркер выпадающего списка
     'dropdown_arrow' => '
@@ -444,56 +468,89 @@ class StorefrontModernMenu extends Walker_Nav_Menu {
     </svg>
     ',
   ];
-  # }}}
-  # конструктор {{{
-  function __construct($woocommerce_plugin = false)
+  function __construct($I)
   {
-    global $wp_query;
-    ###
-    # инициализация параметров woocommerce
-    if ($woocommerce_plugin)
-    {
-      if ($this->wc_active = is_woocommerce())
-      {
-        # проверим выбрана ли страница:
-        # - конкретного товара
-        # - категории товара
-        # - тэга товара
-        if (is_product() ||
-            is_product_category() ||
-            is_product_tag())
-        {
-          # эти страницы логически связаны со страницей магазина, но,
-          # по-умолчанию элемент меню не получает класс с соответствующей индикацией.
-          # необходимо определить идентификатор страницы магазина,
-          # чтобы при выводе элементов исправить это недоразумение.
-          $this->wc_shop_active = true;
-          $this->wc_shop_id = wc_get_page_id('shop');
-        }
-      }
-    }
-    # инициализация параметров блога
-    # определим идентификатор основной страницы блога
-    while (($a = get_option('page_for_posts')) !== false) {
-      # сохраняем как число
-      $this->wp_blog_id = $a = intval($a);
-      # определим идентификатор текущего объекта
-      if (($b = $wp_query->get_queried_object_id()) === 0) {
-        break;
-      }
-      # получаем данные
-      if (($b = get_post($b)) === null) {
-        break;
-      }
-      # определим является ли объект постом блога
-      if ($b->ID !== $a && $b->post_type === 'post') {
-        $this->wp_blog_active = true;
-      }
-      break;
+    $this->I = $I;
+    if ($I->isShop) {
+      $this->shop_id = wc_get_page_id('shop');
     }
   }
   # }}}
-  # обработчики начала и конца уровня {{{
+  # item {{{
+  function start_el(&$o, $item, $depth = 0, $args = array(), $id = 0)
+  {
+    # prepare
+    #$title = apply_filters('the_title', $item->title, $item->ID);
+    $I     = $this->I;
+    $id    = intval($item->object_id);
+    $title = esc_html($item->title);
+    $url   = esc_attr($item->url);
+    $class = is_array($item->classes)
+      ? trim(implode(' ', $item->classes))
+      : '';
+    # check
+    if ($depth === 0)
+    {
+      # root list,
+      # determine current
+      if (($I->isShop && $this->shop_id === $id))
+      {
+        $class = trim($class.' x');
+      }
+      # determine has dropdown
+      $svg = '';
+      if (strpos($class, 'menu-item-has-children') !== false) {
+        $svg = $this->svg['dropdown_arrow'];
+      }
+      # compose
+      $o .=
+        '<div>'.
+        '<button type="button" class="'.$class.'"'.
+        ' data-href="'.$url.'"><h3>'.$title.'</h3><hr>'.
+        '';
+    }
+    else {
+      # внутренний
+      # проверим подтип элемента
+      switch ($item->url) {
+      case '#':
+        # заголовок
+        $o .= <<<EOD
+
+        <h3>{$title}</h3>
+
+EOD;
+        break;
+      default:
+        # ссылка
+        # формируем отступ
+        $pad = '';
+        if (($a = $depth) > 1) {
+          while (--$a) {
+            $pad .= $this->svg['pad'];
+          }
+        }
+        # готово
+        $o .= <<<EOD
+
+        <a{$param} class="{$class}">
+          {$pad}<div>{$title}</div>
+        </a>
+
+EOD;
+        break;
+      }
+    }
+  }
+  function end_el(&$o, $item, $depth = 0, $args = [])
+  {
+    # close element body
+    if ($depth === 0) {
+      $o .= '</div>';
+    }
+  }
+  # }}}
+  # dropdown {{{
   function start_lvl(&$output, $depth = 0, $args = array())
   {
     if ($depth < 1) {
@@ -514,92 +571,6 @@ class StorefrontModernMenu extends Walker_Nav_Menu {
     }
     $output .= $a;
   }
-  # }}}
-  # обработчики начала и конца элемента {{{
-  function start_el(&$output, $item, $depth = 0, $args = array(), $id = 0)
-  {
-    # определяем наименование
-    $title = apply_filters('the_title', $item->title, $item->ID);
-    # определяем параметры ссылки
-    $param  = !empty($item->attr_title) ? ' title="'  .esc_attr($item->attr_title).'"' : '';
-    $param .= !empty($item->target)     ? ' target="' .esc_attr($item->target    ).'"' : '';
-    $param .= !empty($item->xfn)        ? ' rel="'    .esc_attr($item->xfn       ).'"' : '';
-    $param .= !empty($item->url)        ? ' href="'   .esc_attr($item->url       ).'"' : '';
-    # определяем набор классов
-    $classes = '';
-    if (is_array($item->classes)) {
-      $classes = trim(implode(' ', $item->classes));
-    }
-    # определяем идентификатор объекта на который ссылается элемент
-    $object_id = intval($item->object_id);
-    # определяем тип элемента
-    if ($depth === 0) {
-      # основной
-      # проверяем необходимо ли установить дополнительный класс
-      # для логической связи данного пункта меню
-      if (($this->wc_shop_active &&
-           $this->wc_shop_id === $object_id) ||
-          ($this->wp_blog_active &&
-           $this->wp_blog_id === $object_id))
-      {
-        $classes = trim($classes.' current-menu-ancestor');
-      }
-      # проверяем наличие выпадающего меню
-      $svg = '';
-      if (strpos($classes, 'menu-item-has-children') !== false) {
-        $svg = $this->svg['dropdown_arrow'];
-      }
-      # готово
-      $output .= <<<EOD
-
-      <li class="{$classes}">
-      <a{$param}>
-        <div>{$title}</div>{$svg}
-      </a>
-      <hr>
-
-EOD;
-    }
-    else {
-      # внутренний
-      # проверим подтип элемента
-      switch ($item->url) {
-      case '#':
-        # заголовок
-        $output .= <<<EOD
-
-        <h3>{$title}</h3>
-
-EOD;
-        break;
-      default:
-        # ссылка
-        # формируем отступ
-        $pad = '';
-        if (($a = $depth) > 1) {
-          while (--$a) {
-            $pad .= $this->svg['pad'];
-          }
-        }
-        # готово
-        $output .= <<<EOD
-
-        <a{$param} class="{$classes}">
-          {$pad}<div>{$title}</div>
-        </a>
-
-EOD;
-        break;
-      }
-    }
-  }
-  function end_el(&$output, $item, $depth = 0, $args = array())
-  {
-    if ($depth === 0) {
-      $output .= '</li>';
-    }
-	}
-  # }}}
   # }}}
 }
 # setup hook {{{

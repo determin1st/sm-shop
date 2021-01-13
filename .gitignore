@@ -1,7 +1,5 @@
-node_modules/
-todo/
+arc/
 inc/httpFetch
-inc/carbon-fields
 inc/gsap
 *.vim
 *.swp

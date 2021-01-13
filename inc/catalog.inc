@@ -1,10 +1,4 @@
-<?php # shop template
-defined('ABSPATH') || exit;
-# generate markup
-ob_start();
-?>
-
-<div id="sm-shop">
+<div id="catalog">
   <div class="body">
 
     <div class="ctl sm-blocks-resizer">
@@ -51,11 +45,3 @@ ob_start();
     <div class="box"></div>
   </div>
 </div>
-
-<?php
-$o = ob_get_clean();
-# output
-get_header('shop');
-echo StorefrontModernBlocks::parse($o);
-get_footer('shop');
-?>
