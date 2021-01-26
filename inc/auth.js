@@ -2,8 +2,8 @@
 "use strict";
 window.addEventListener('load', function(){
   var root, node, a;
-  if (!(root = document.getElementById('auth')) || typeof gsap === 'undefined') {
-    console.log('login script requirements failed');
+  if (!(root = document.getElementById('auth'))) {
+    console.log('auth requirements failed');
     return;
   }
   node = {

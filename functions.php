@@ -1,27 +1,8 @@
 <?php
-# check wordpress loaded {{{
-if (!defined('ABSPATH') || !function_exists('add_action')) {
-  exit;
-}
-# }}}
 class StorefrontModern {
   # data {{{
   private static
-    $I = null;    # singleton instance
-  public
-    $URI   = '',  # URI of the theme
-    $ERROR = '',  # fatal error message
-    ###
-    $isCharged     = false, # theme ready
-    $isAdmin       = false,
-    $isGutenberg   = false,
-    $isCustomizer  = false,
-    $isAccountPage = false,
-    $isFrontPage   = false,
-    $isCart        = false,
-    $isProduct     = false,
-    $isShop        = false;
-  public static
+    $I = null,# singleton instance
     $icons = [ # {{{
       # https://www.iconfinder.com/iconsets/ionicons
       'filing' => '
@@ -59,20 +40,39 @@ class StorefrontModern {
     ],
     # }}}
     $scripts = [ # {{{
-      ['index',   ['gsap', 'sm-blocks']],
-      ['auth',    ['sm-index']],
-      ['catalog', ['sm-index']],
+      'index' => ['sm-blocks'],
+      'auth'  => ['sm-index'],
+    ],
+    # }}}
+    $styles = [ # {{{
+      'index'   => ['sm-blocks'],
+      'auth'    => ['sm-index'],
+      'catalog' => ['sm-index'],
     ];
     # }}}
+  public
+    $BRAND = 'sm-shop',
+    $URI   = '',# URI of the theme
+    $LANG  = '',# current language
+    $ERROR = '',# fatal message
+    $PAGE  = 'error',# current page template
+    ###
+    $isExclusive  = true,
+    $isLoggedIn   = false,
+    $isAdmin      = false,
+    $isGutenberg  = false,
+    ###
+    $inCustomizer = false,
+    $inCart       = false,
+    $inProduct    = false,
+    $inShop       = false;
   # }}}
   # constructor {{{
   private function __construct()
   {
-    # check requirements {{{
-    ###
+    # checks {{{
     global $wp_version;
     $I = $this;
-    ###
     if (version_compare('7.4', phpversion(), '>'))
     {
       $I->ERROR = 'newer PHP version required';
@@ -94,24 +94,58 @@ class StorefrontModern {
       return;
     }
     # }}}
-    # initialize {{{
-    $I->URI = get_stylesheet_directory_uri();
-    $I->isAdmin = is_admin();
+    # initialization {{{
+    # after theme setup
+    $I->URI  = get_stylesheet_directory_uri();
+    $I->LANG = substr(get_locale(), 0, 2);
+    $I->isLoggedIn  = is_user_logged_in();
+    $I->isAdmin     = is_admin();
     $I->isGutenberg = function_exists('register_block_type');
-    $I->isCustomizer = is_customize_preview();
-    ###
-    add_action('wp', function() use ($I) {
-      ###
-      $I->isAccountPage = is_account_page();
-      $I->isFrontPage   = is_front_page();
-      $I->isCart        = is_cart();
-      $I->isProduct     = (is_product() || is_product_category() || is_product_tag());
-      if ($I->isShop = is_shop())
-      {
-        StorefrontModernBlocks::init();
+    add_action('wp', function() use ($I)
+    {
+      # after wordpress is ready
+      $I->inCustomizer = is_customize_preview();
+      #$I->inAccountPage = is_account_page();
+      #$I->inFrontPage   = is_front_page();
+      $I->inCart    = is_cart();
+      $I->inProduct = (is_product() || is_product_category() || is_product_tag());
+      $I->inShop    = is_shop();
+      # determine page template
+      if (!$I->isLoggedIn) {
+        $I->PAGE = 'auth';
       }
-      add_action('wp_enqueue_scripts', function() use ($I) {
-        $I->enqueue();
+      else
+      {
+        $I->isExclusive = false;
+        if ($I->inShop) {
+          $I->PAGE = 'catalog';
+        }
+        else {
+          $I->PAGE = 'index';
+        }
+      }
+      # set enqueue hook
+      add_action('wp_enqueue_scripts', function() use ($I)
+      {
+        if ($I->isExclusive)
+        {
+          wp_enqueue_script('sm-'.$I->PAGE);
+          wp_enqueue_style('sm-'.$I->PAGE);
+        }
+        else
+        {
+          wp_enqueue_script('sm-index');
+          wp_enqueue_style('sm-index');
+          if (array_key_exists($I->PAGE, $I::$styles)) {
+            wp_enqueue_style('sm-'.$I->PAGE);
+          }
+          # add sm-blocks launcher with initial configuration
+          $cfg = StorefrontModernBlocks::config($I->BRAND);
+          wp_add_inline_script(
+            'sm-index',
+            'SM().attach(document,'.$cfg.');'
+          );
+        }
       });
       /***
       global $wp_query;
@@ -138,10 +172,9 @@ class StorefrontModern {
       }
       /***/
     });
-    $I->isCharged = true;
     # }}}
-    # register scripts and styles {{{
-    # external
+    # registration {{{
+    # external scripts
     # these scripts are separate projects that may be stored
     # locally (same-origin) or remotely (cdn)
     wp_register_script(
@@ -151,15 +184,32 @@ class StorefrontModern {
         : 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.6/gsap.min.js'),
       [], false, true
     );
-    # internal
-    foreach (self::$scripts as $a)
+    # internal scripts
+    foreach (self::$scripts as $a => $b)
     {
-      $b = $I->URI.'/inc/'.$a[0];
-      wp_register_script('sm-'.$a[0], $b.'.js', $a[1], false, true);
-      wp_register_style('sm-'.$a[0], $b.'.css', $a[1]);
+      wp_register_script(
+        'sm-'.$a,
+        $I->URI.'/inc/'.$a.'.js',
+        $b, false, true
+      );
     }
+    # internal styles
+    foreach (self::$styles as $a => $b)
+    {
+      wp_register_style(
+        'sm-'.$a,
+        $I->URI.'/inc/'.$a.'.css',
+        $b
+      );
+    }
+    # navigation menus
+    $a = [];
+    $a[$I->BRAND] = ($I->LANG === 'ru')
+      ? 'основное меню '.$I->BRAND
+      : $I->BRAND.'primary menu';
+    register_nav_menus($a);
     # }}}
-    # set theme features {{{
+    # features {{{
     #add_theme_support('woocommerce');
     /***
     add_theme_support('woocommerce', [
@@ -177,10 +227,6 @@ class StorefrontModern {
     /***/
     #add_theme_support('editor-styles');
     #add_editor_style('inc/admin-editor.css');
-    register_nav_menus([
-      'sm-menu' => 'sm-shop menu',
-    ]);
-    ###
     ###
     # <iframe> lazy loading
     add_filter('embed_oembed_html', function($html)
@@ -224,7 +270,7 @@ class StorefrontModern {
       return true;
     }, 10, 2);
     # }}}
-    # tune wordpress environment {{{
+    # tuning {{{
     # disable rss-feed in <head>
     remove_action('wp_head', 'feed_links', 2);
     remove_action('wp_head', 'feed_links_extra', 3);
@@ -306,14 +352,13 @@ class StorefrontModern {
       self::$I = new StorefrontModern();
     }
   }
-  public static function isReady() {
-    return (self::$I && self::$I->isCharged) ? true : false;
-  }
-  public static function getError() {
-    return self::$I->ERROR;
-  }
+  public static function error()      {return self::$I->ERROR;}
+  public static function page()       {return self::$I->PAGE;}
+  public static function exclusive()  {return self::$I->isExclusive;}
   public static function parse($html, $data)
   {
+    # {{{
+    # TODO: triple brackets
     # get template tokens
     $list = [];
     if (!preg_match_all('/{{([^}]+)}}/', $html, $list) ||
@@ -333,45 +378,11 @@ class StorefrontModern {
     }
     # tidy gaps and complete
     return preg_replace('/>\s+</', '><', $html);
-  }
-  public static function menu()
-  {
-    return wp_nav_menu([
-      'menu'            => 'sm-menu',
-      'menu_id'         => '',
-      'menu_class'      => '',
-      'container'       => 'div',
-      'container_id'    => '',
-      'container_class' => 'sm-menu',
-      'walker'          => new StorefrontModernMenu(self::$I),
-      'echo'            => false,
-      'items_wrap'      => '<div>%3$s</div>',
-    ]);
+    # }}}
   }
   # }}}
-  # enqueue scripts and styles {{{
-  private function enqueue()
-  {
-    if (!is_user_logged_in())
-    {
-      wp_enqueue_script('sm-auth');
-      wp_enqueue_style('sm-auth');
-    }
-    else if ($this->isShop)
-    {
-      wp_enqueue_script('sm-catalog');
-      wp_enqueue_style('sm-catalog');
-    }
-    else
-    {
-      wp_enqueue_script('sm-index');
-      wp_enqueue_style('sm-index');
-    }
-  }
-  # }}}
+  # {{{
   # multi-domain {{{
-  # enables constant navigation (fixes absolute URLs)
-  # when site is accessed under different domain names
   private function enableMultiDomainConfig()
   {
     ###
@@ -419,163 +430,15 @@ class StorefrontModern {
     });
   }
   # }}}
-  # helpers {{{
-  public static function array_move_before($arr, $find, $move)
-  {
-    if (!isset($arr[$find], $arr[$move])) {
-        return $arr;
-    }
-    $elem = [$move=>$arr[$move]];  // cache the element to be moved
-    $start = array_splice($arr, 0, array_search($find, array_keys($arr)));
-    unset($start[$move]);  // only important if $move is in $start
-    return $start + $elem + $arr;
-  }
-  public static function array_insert_before($a, $e, $k, $v)
-  {
-    if (!isset($a[$e]))
-    {
-      $a[$k] = $v;
-      return $a;
-    }
-    if (($i = array_search($e, array_keys($a))) === 0) {
-      $b = [$k => $v];
-    }
-    else
-    {
-      $b = array_slice($a, 0, $i);
-      $b[$k] = $v;
-    }
-    return $b + array_slice($a, $i);
-  }
   # }}}
 }
-class StorefrontModernMenu extends Walker_Nav_Menu {
-  # constructor {{{
-  private
-    $I = null,
-    $shop_id = -1;
-  public $svg = [
-    # маркер выпадающего списка
-    'dropdown_arrow' => '
-    <svg preserveAspectRatio="none" viewBox="0 0 64 64">
-      <path stroke="#000" stroke-linejoin="bevel" stroke-miterlimit="10" stroke-width="4" d="M15 24l17 17 17-17"/>
-    </svg>
-    ',
-    # отступ для вложенных
-    'pad' => '
-    <svg preserveAspectRatio="none" viewBox="0 0 100 100">
-      <path d="M72.4 48.6l-42-42c-.8-.8-2-.8-2.8 0-.8.8-.8 2 0 2.8L68.2 50 27.6 90.6c-.8.8-.8 2 0 2.8.4.4.9.6 1.4.6s1-.2 1.4-.6l42-42c.8-.8.8-2 0-2.8z"/>
-    </svg>
-    ',
-  ];
-  function __construct($I)
-  {
-    $this->I = $I;
-    if ($I->isShop) {
-      $this->shop_id = wc_get_page_id('shop');
-    }
-  }
-  # }}}
-  # item {{{
-  function start_el(&$o, $item, $depth = 0, $args = array(), $id = 0)
-  {
-    # prepare
-    #$title = apply_filters('the_title', $item->title, $item->ID);
-    $I     = $this->I;
-    $id    = intval($item->object_id);
-    $title = esc_html($item->title);
-    $url   = esc_attr($item->url);
-    $class = is_array($item->classes)
-      ? trim(implode(' ', $item->classes))
-      : '';
-    # check
-    if ($depth === 0)
-    {
-      # root list,
-      # determine current
-      if (($I->isShop && $this->shop_id === $id))
-      {
-        $class = trim($class.' x');
-      }
-      # determine has dropdown
-      $svg = '';
-      if (strpos($class, 'menu-item-has-children') !== false) {
-        $svg = $this->svg['dropdown_arrow'];
-      }
-      # compose
-      $o .=
-        '<div>'.
-        '<button type="button" class="'.$class.'"'.
-        ' data-href="'.$url.'"><h3>'.$title.'</h3><hr>'.
-        '';
-    }
-    else {
-      # внутренний
-      # проверим подтип элемента
-      switch ($item->url) {
-      case '#':
-        # заголовок
-        $o .= <<<EOD
-
-        <h3>{$title}</h3>
-
-EOD;
-        break;
-      default:
-        # ссылка
-        # формируем отступ
-        $pad = '';
-        if (($a = $depth) > 1) {
-          while (--$a) {
-            $pad .= $this->svg['pad'];
-          }
-        }
-        # готово
-        $o .= <<<EOD
-
-        <a{$param} class="{$class}">
-          {$pad}<div>{$title}</div>
-        </a>
-
-EOD;
-        break;
-      }
-    }
-  }
-  function end_el(&$o, $item, $depth = 0, $args = [])
-  {
-    # close element body
-    if ($depth === 0) {
-      $o .= '</div>';
-    }
-  }
-  # }}}
-  # dropdown {{{
-  function start_lvl(&$output, $depth = 0, $args = array())
-  {
-    if ($depth < 1) {
-      $a = '<div class="dropdown">';
-    }
-    else {
-      $a = '';
-    }
-    $output .= "\n".$a;
-  }
-  function end_lvl(&$output, $depth = 0, $args = array())
-  {
-    if ($depth < 1) {
-      $a = '</div>';
-    }
-    else {
-      $a = '';
-    }
-    $output .= $a;
-  }
-  # }}}
+# hookup {{{
+# check wordpress loaded
+if (defined('ABSPATH') || function_exists('add_action'))
+{
+  add_action('after_setup_theme', function() {
+    StorefrontModern::init();
+  });
 }
-# setup hook {{{
-add_action('after_setup_theme', function() {
-  StorefrontModern::init();
-});
 # }}}
 ?>

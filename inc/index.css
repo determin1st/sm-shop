@@ -1,6 +1,3 @@
-/**
-* Theme layout and styles
-*/
 @font-face {
   font-family: 'Kazmann';
   font-weight: 400;
@@ -330,8 +327,24 @@ body .w3-box .groupbar > .inputbox:nth-child(1) {
 body .w3-box .groupbar > .inputbox:nth-last-child(1) {
   padding-right: 0;
 }
-body .sm-menu {
+body .sm-menu > div {
+  width: 100%;
+  height: 1em;
+  display: flex;
+  flex-direction: row;
+}
+body .sm-menu > div > button {
+  width: auto;
   height: 100%;
+  padding: 0.2em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+body .sm-menu > div > button > hr {
+  height: 4px;
+  margin: 0;
 }
 body .sm-menu > .menu {
   flex: 1 1 auto;
@@ -503,6 +516,7 @@ body .sm-minicart.is-current > a > span {
 body > .head {
   padding: 0 8px 0 8px;
   display: block;
+  overflow: visible;
 }
 body > .head > div {
   width: 100%;
@@ -582,6 +596,12 @@ body > .head > .b {
   height: auto;
   display: flex;
   flex-direction: row;
+}
+body > .head > .b > .sm-menu {
+  flex: 1 1 0;
+}
+body > .head > .b > .sm-minicart {
+  flex: 0 0 0;
 }
 body > .head > .c {
   width: 100%;

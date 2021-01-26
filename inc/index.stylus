@@ -1,6 +1,9 @@
-/**
-* Theme layout and styles
-*/
+// helpers {{{
+cv(c)
+	s('%s,%s,%s', red(c), green(c), blue(c));
+rgba(cv,alpha=1)
+	s('rgba(%s,%s)', cv, alpha);
+// }}}
 // fonts {{{
 @font-face
 	font-family: 'Kazmann'
@@ -29,12 +32,6 @@
 	     url('TradeWinds.woff') format('woff'),
 	     url('TradeWinds.ttf') format('truetype');
 /***/
-// }}}
-// helpers {{{
-cv(c)
-	s('%s,%s,%s', red(c), green(c), blue(c));
-rgba(cv,alpha=1)
-	s('rgba(%s,%s)', cv, alpha);
 // }}}
 // base {{{
 html, body
@@ -320,7 +317,23 @@ body
 		// }}}
 	// }}}
 	.sm-menu // {{{
-		height: 100%;
+		> div
+			width:  100%
+			height: 1em
+			display: flex
+			flex-direction: row
+			> button
+				width:  auto
+				height: 100%
+				padding: 0.2em
+				display: flex
+				flex-direction: column
+				align-items: stretch
+				justify-content: center
+				> hr
+					height: 4px
+					margin: 0
+		////
 		> .menu
 			// не стандартный список
 			flex: 1 1 auto;
@@ -490,6 +503,7 @@ body
 	> .head // {{{
 		padding: 0 8px 0 8px
 		display: block
+		overflow: visible // to display menu dropdowns
 		> div
 			width: 100%
 			display: flex
@@ -557,6 +571,10 @@ body
 			height: auto
 			display: flex
 			flex-direction: row
+			> .sm-menu
+				flex: 1 1 0
+			> .sm-minicart
+				flex: 0 0 0
 		// }}}
 		> .c // {{{
 			width:  100%

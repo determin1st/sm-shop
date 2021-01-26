@@ -1,10 +1,8 @@
 "use strict"
 window.addEventListener 'load', !->
 	# check requirements
-	if not (root = document.getElementById 'auth') or \
-	  (typeof gsap == 'undefined')
-		###
-		console.log 'login script requirements failed'
+	if not (root = document.getElementById 'auth')
+		console.log 'auth requirements failed'
 		return
 	# initialize
 	node =
