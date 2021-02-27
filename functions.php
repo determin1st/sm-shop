@@ -48,6 +48,14 @@ class StorefrontModern {
       'index'   => ['sm-blocks'],
       'auth'    => ['sm-index'],
       'catalog' => ['sm-index'],
+      'cart'    => ['sm-index'],
+    ];
+    # }}}
+  public static
+    $fonts = [ # {{{
+      'KazmannSans.woff2',
+      'Montserrat-ExtraBold.woff2',
+      'Bender-Bold.woff2',
     ];
     # }}}
   public
@@ -55,7 +63,7 @@ class StorefrontModern {
     $URI   = '',# URI of the theme
     $LANG  = '',# current language
     $ERROR = '',# fatal message
-    $PAGE  = 'error',# current page template
+    $PAGE  = 'error',# current page
     ###
     $isExclusive  = true,
     $isLoggedIn   = false,
@@ -68,9 +76,8 @@ class StorefrontModern {
     $inShop       = false;
   # }}}
   # constructor {{{
-  private function __construct()
-  {
-    # checks {{{
+  private function __construct() {
+    # check requirements {{{
     global $wp_version;
     $I = $this;
     if (version_compare('7.4', phpversion(), '>'))
@@ -94,14 +101,14 @@ class StorefrontModern {
       return;
     }
     # }}}
-    # initialization {{{
+    # initialize {{{
     # after theme setup
     $I->URI  = get_stylesheet_directory_uri();
     $I->LANG = substr(get_locale(), 0, 2);
     $I->isLoggedIn  = is_user_logged_in();
     $I->isAdmin     = is_admin();
     $I->isGutenberg = function_exists('register_block_type');
-    add_action('wp', function() use ($I)
+    add_action('parse_query', function() use ($I)
     {
       # after wordpress is ready
       $I->inCustomizer = is_customize_preview();
@@ -120,6 +127,20 @@ class StorefrontModern {
         if ($I->inShop) {
           $I->PAGE = 'catalog';
         }
+        else if (is_search())
+        {
+          $I->PAGE = 'search';
+          add_action('pre_get_posts', function ($query) {
+            # configure search query
+            $query->set('posts_per_page', 16);
+          }, 1);
+        }
+        else if (is_product()) {
+          $I->PAGE = 'product';
+        }
+        else if ($I->inCart) {
+          $I->PAGE = 'cart';
+        }
         else {
           $I->PAGE = 'index';
         }
@@ -127,23 +148,26 @@ class StorefrontModern {
       # set enqueue hook
       add_action('wp_enqueue_scripts', function() use ($I)
       {
+        # set page style
+        if (array_key_exists($I->PAGE, $I::$styles)) {
+          wp_enqueue_style('sm-'.$I->PAGE);
+        }
+        else if (!$I->isExclusive) {
+          wp_enqueue_style('sm-index');
+        }
+        # set page script
         if ($I->isExclusive)
         {
-          wp_enqueue_script('sm-'.$I->PAGE);
-          wp_enqueue_style('sm-'.$I->PAGE);
+          if (array_key_exists($I->PAGE, $I::$scripts)) {
+            wp_enqueue_script('sm-'.$I->PAGE);
+          }
         }
         else
         {
           wp_enqueue_script('sm-index');
-          wp_enqueue_style('sm-index');
-          if (array_key_exists($I->PAGE, $I::$styles)) {
-            wp_enqueue_style('sm-'.$I->PAGE);
-          }
-          # add sm-blocks launcher with initial configuration
-          $cfg = StorefrontModernBlocks::config($I->BRAND);
           wp_add_inline_script(
             'sm-index',
-            'SM().attach(document,'.$cfg.');'
+            'SM().init(document,'.StorefrontModernBlocks::config($I->BRAND).');'
           );
         }
       });
@@ -173,7 +197,12 @@ class StorefrontModern {
       /***/
     });
     # }}}
-    # registration {{{
+    # register {{{
+    # fonts
+    foreach (self::$fonts as &$a) {
+      $a = $I->URI.'/inc/fonts/'.$a;
+    }
+    unset($a);
     # external scripts
     # these scripts are separate projects that may be stored
     # locally (same-origin) or remotely (cdn)
@@ -209,7 +238,7 @@ class StorefrontModern {
       : $I->BRAND.'primary menu';
     register_nav_menus($a);
     # }}}
-    # features {{{
+    # add features {{{
     #add_theme_support('woocommerce');
     /***
     add_theme_support('woocommerce', [
@@ -270,7 +299,7 @@ class StorefrontModern {
       return true;
     }, 10, 2);
     # }}}
-    # tuning {{{
+    # tune wordpress {{{
     # disable rss-feed in <head>
     remove_action('wp_head', 'feed_links', 2);
     remove_action('wp_head', 'feed_links_extra', 3);
@@ -295,6 +324,18 @@ class StorefrontModern {
     remove_filter('the_content_feed', 'wp_staticize_emoji');
     remove_filter('comment_text_rss', 'wp_staticize_emoji');
     remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
+    # remove admin-bar
+    show_admin_bar(false);
+    /***
+    add_action('wp_enqueue_scripts', function() use ($I) {
+      # "bump" and "print" inline-styles
+      remove_action('wp_head', '_admin_bar_bump_cb');
+      remove_action('wp_head', 'wp_admin_bar_header');
+      # standard style and script
+      wp_dequeue_style('admin-bar');
+      wp_dequeue_script('admin-bar');
+    });
+    /***/
     ###
     # Отключаем принудительную проверку новых версий WP,
     # плагинов и темы в админке, чтобы она не тормозила,
@@ -355,33 +396,8 @@ class StorefrontModern {
   public static function error()      {return self::$I->ERROR;}
   public static function page()       {return self::$I->PAGE;}
   public static function exclusive()  {return self::$I->isExclusive;}
-  public static function parse($html, $data)
-  {
-    # {{{
-    # TODO: triple brackets
-    # get template tokens
-    $list = [];
-    if (!preg_match_all('/{{([^}]+)}}/', $html, $list) ||
-        count($list) < 2 || count($list[1]) === 0)
-    {
-      return $html;# nothing to substitute
-    }
-    # iterate
-    foreach ($list[1] as $a)
-    {
-      # extract value
-      $b = (array_key_exists($a, $data) && is_string($data[$a]))
-        ? $data[$a]
-        : '';
-      # substitute
-      $html = str_replace('{{'.$a.'}}', $b, $html);
-    }
-    # tidy gaps and complete
-    return preg_replace('/>\s+</', '><', $html);
-    # }}}
-  }
   # }}}
-  # {{{
+  # TODO {{{
   # multi-domain {{{
   private function enableMultiDomainConfig()
   {

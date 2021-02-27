@@ -1,4 +1,4 @@
-<?php # auth
+<?php
 # prepare
 # TODO:REGISTER {{{
 $regForm      = '';
@@ -42,7 +42,7 @@ if (false)
 </form>
 
 <?php
-  $regForm = StorefrontModern::parse(ob_get_clean(), [
+  $regForm = StorefrontModernBlocks::parse(ob_get_clean(), [
     'action'     => esc_url(home_url('/')),
     'regEmail'   => (!empty($_POST['email']) ? esc_attr(wp_unslash($_POST['email'])) : ''),
     'emailLabel' => __('Email address', 'woocommerce'),
@@ -87,7 +87,7 @@ ob_start();
 </form>
 
 <?php
-$loginForm = StorefrontModern::parse(ob_get_clean(), [
+$loginForm = StorefrontModernBlocks::parse(ob_get_clean(), [
   'action'     => esc_url(home_url('/')),
   'userName'   => (empty($_POST['username']) ? '' : esc_attr(wp_unslash($_POST['username']))),
   'userLabel'  => __('Username or email address', 'woocommerce'),
@@ -117,7 +117,7 @@ do_action('woocommerce_before_customer_login_form');
 <?php
 do_action('woocommerce_after_customer_login_form');
 # }}}
-echo StorefrontModern::parse(ob_get_clean(), [
+echo StorefrontModernBlocks::parse(ob_get_clean(), [
   'title'    => ($isRegActive ? __('Register', 'woocommerce') : __('Login', 'woocommerce')),
   'variant'  => ($isRegActive ? 'b' : 'a'),
   'login'    => $loginForm,

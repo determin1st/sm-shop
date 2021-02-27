@@ -9,8 +9,8 @@ rgba(cv,alpha=1)
 	font-family: 'Kazmann'
 	font-weight: 400
 	font-style: normal
-	src: url('fonts/Kazmann Sans.woff2') format('woff2'),
-	     url('fonts/Kazmann Sans.woff') format('woff')
+	src: url('fonts/KazmannSans.woff2') format('woff2'),
+	     url('fonts/KazmannSans.woff') format('woff')
 @font-face
 	font-family: 'Montserrat'
 	font-weight: 800
@@ -23,15 +23,6 @@ rgba(cv,alpha=1)
 	font-style:  normal
 	src: url('fonts/Bender-Bold.woff2') format('woff2'),
 	     url('fonts/Bender-Bold.woff') format('woff')
-/***
-@font-face
-	font-family: 'TradeWinds'
-	font-display: fallback
-	src: local('Trade Winds'),
-	     url('TradeWinds.woff2') format('woff2'),
-	     url('TradeWinds.woff') format('woff'),
-	     url('TradeWinds.ttf') format('truetype');
-/***/
 // }}}
 // base {{{
 html, body
@@ -40,6 +31,7 @@ html, body
 	margin:  0
 	padding: 0
 	border:  0
+	box-sizing: border-box
 	scroll-behavior: smooth
 div,form,input,button,label,svg,h1,h2,h3,h4
 	margin:  0
@@ -67,519 +59,207 @@ body
 	--sm-font-label: Montserrat, sans-serif
 	--sm-font-input: Bender, sans-serif
 	////
+	/***
+	display: flex
+	flex-direction: column
+	align-items: stretch
+	justify-content: flex-start
+	/***/
 	background-color: rgba(var(--sm-color-1))
 	// }}}
-	.w3-box // {{{
-		--height: calc(var(--sm-size-height) * var(--sm-size-factor))
-		font-size: var(--height)
-		width:  100%
-		height: auto
-		overflow: hidden
-		.inputbox // {{{
-			width: 100%
-			padding-bottom: 0.292em // 14px
-			display: flex
-			flex-direction: column
-			align-items: flex-start
-			> label
-				order: 1
-				display: block
-				font-weight: bold
-				background-color: transparent
-				color: rgba(var(--sm-color-5))
-				font-family: var(--sm-font-label)
-				font-size: 0.292em // 14px
-				white-space: nowrap
-			> input,
-			> select,
-			> textarea
-				font-size: 0.417em // 20px
-				width:  100%
-				height: var(--height)
-				padding: 0.5em
-				////
-				order: 2
-				display: block
-				box-sizing: border-box
-				margin: 0
-				border-width: 0
-				border-top: 1px solid rgba(var(--sm-color-4))
-				box-shadow: inset 0 1px 2px rgba(var(--sm-color-4))
-				border-radius: 2px
-				background-color: rgba(var(--sm-color-1), 0.75)
-				color: rgba(var(--sm-color-4))
-				font-family: var(--sm-font-input)
-				&:focus
-					outline: none
-					border-color: rgba(var(--sm-color-6))
-					box-shadow: inset 0 1px 1px rgba(var(--sm-color-7))
-					background-color: rgba(var(--sm-color-1), 0.95)
-					color: rgba(var(--sm-color-0))
-					~ label
-						color: rgba(var(--sm-color-7))
-				&:disabled
-					background-color: transparent
-					color: rgba(var(--sm-color-2))
-					border-style: none
-					border-bottom-style: solid
-					border-radius: 0
-				&::placeholder
-					color: rgba(var(--sm-color-5))
-			////
-			> textarea
-				height: auto
-			////
-			/***
-			&.required
-				> label:before
-					color: red
-					content: '*'
-			&.readonly
-				> input,
-				> select,
-				> textarea
-					border-top: none
-					border-left: none
-					border-right: none
-					border-radius: 0
-					background-color: transparent
-					&:focus
-						//box-shadow: none
-						box-shadow: inset 0 -4px 6px -6px hsl(210, 13%, 60%)
-					&::placeholder
-						color: transparent
-			&.hidden
-				display: none
-			/***/
-		// }}}
-		.cmdbox // {{{
+	> .head // {{{
+		font-size: calc(var(--sm-size-height) * var(--sm-size-factor))
+		flex: 0 0 auto
+		padding: 4px 4px 0 4px
+		background-color: rgba(var(--sm-color-3), 0.2)
+		display: block
+		overflow: visible // display menu dropdowns
+		> div
 			width:  100%
-			height: 1.25em
+			height: calc(1em + 20px)
+			padding: 10px 24px
 			display: flex
 			flex-direction: row
-			align-items: flex-start
-			> button
-				font-size: 0.417em
-				width:  100%
-				height: 100%
-				padding: 0.5em
-				////
-				border: 2px solid rgba(var(--sm-color-2))
-				border-radius: 2px
-				background-color: rgba(var(--sm-color-0))
-				color: rgba(var(--sm-color-1))
-				font-family: var(--sm-font-label)
-				cursor: pointer
-				outline: none
-				&:hover
-					background-color: rgba(var(--sm-color-0), 0.85)
-					border-color: rgba(var(--sm-color-0))
-				&:focus
-					background-color: rgba(var(--sm-color-0))
-					border-color: rgba(var(--sm-color-0))
-					border-width: 1px
-					box-shadow: inset 0 0 0 1px rgba(var(--sm-color-1))
-					&:hover
-						background-color: rgba(var(--sm-color-0), 0.85)
-				&:active
-					color: rgba(var(--sm-color-7))
-					box-shadow: inset 0 0 0 1px rgba(var(--sm-color-7))
-				&:disabled
-					color: transparent
-					cursor: default
-			/***
-			&.ripple-effect > button:enabled
-				background-position: center;
-				transition: background 0.5s;
-				&:hover
-					background: hsl(240, 100%, 95%) radial-gradient(circle, transparent 1%, hsl(240, 100%, 95%) 1%) center/15000%;
-				&:active
-					background-color: hsl(210, 13%, 50%);
-					background-size: 100%;
-					transition: background 0s;
-			/***/
-		// }}}
-		.linkbox // {{{
-			width:  1em
-			height: 1em
-			> a
-				width:  100%
-				height: 100%
-				display: block
-				background-color: transparent
-				cursor: pointer
-				outline: none
-				> svg
+			background-color: rgba(var(--sm-color-3), 0.4)
+			gap: 8px
+			> div // {{{
+				height: auto
+				display: flex
+				flex-direction: row
+				.linkbox
+					width:  auto
+					height: 100%
+					padding-right: 16px
+					//min-width:  1.333em
+					//min-height: 1.333em
+					svg
+						width:  auto
+						height: 100%
+						fill: rgba(var(--sm-color-5))
+					&:hover svg
+						fill: rgba(var(--sm-color-0))
+			// }}}
+			> .a // {{{
+				flex: 0 0 auto
+			// }}}
+			> .b // {{{
+				flex: 1 1 0
+				//padding: 0.167em // 8px
+				padding: 4px 0
+				display: flex
+				flex-direction: row
+				align-items: stretch
+				> .inputbox
+					position: relative
 					width:  100%
 					height: 100%
-					display: block
-					fill: rgba(var(--sm-color-2))
-				/***
-				&:hover
-					background-color: rgba(var(--sm-color-0), 0.85)
-					border-color: rgba(var(--sm-color-0))
-				&:focus
-					background-color: rgba(var(--sm-color-0))
-					border-color: rgba(var(--sm-color-0))
-					border-width: 1px
-					box-shadow: inset 0 0 0 1px rgba(var(--sm-color-1))
-					&:hover
-						background-color: rgba(var(--sm-color-0), 0.85)
-				&:active
-					color: rgba(var(--sm-color-7))
-					box-shadow: inset 0 0 0 1px rgba(var(--sm-color-7))
-				&:disabled
-					color: transparent
-					cursor: default
-				/***/
-		// }}}
-		////
-		.checkbox // {{{
-		{
-			display: flex;
-			align-items: center;
-			overflow: hidden;
-			width: 100%;
-			padding: 8px 0;
-			> input
-			{
-				display: block;
-				width: 24px;
-				height: 24px;
-				box-sizing: border-box;
-				margin: 0;
-				cursor: pointer;
-				&:checked ~ label
-				{
-					color: black;
-				}
-				&:focus
-				{
-					outline: none;
-					~ label
-					{
-						color: hsl(240, 100%, 60%);
-					}
-				}
-			}
-			> label
-			{
-				font-size: 16px;
-				font-weight: bold;
-				padding-left: 8px;
-				color: hsl(210, 13%, 50%);
-				cursor: pointer;
-				user-select: none;
-				margin: 0;
-			}
-		}
-		// }}}
-		.groupbox // {{{
-		{
-			padding: 6px 0 4px 0;
-			> .checkbox
-			{
-				padding: 0 0 4px 0;
-				> input
-				{
-				}
-				> label
-				{
-				}
-			}
-		}
-		// }}}
-		.groupbar // {{{
-		{
-			display: flex;
-			> .inputbox
-			{
-				flex: 1 1 0;
-				&.w2 {flex: 2 2 0;}
-				&.w3 {flex: 3 3 0;}
-				&.w4 {flex: 4 4 0;}
-				&.w5 {flex: 5 5 0;}
-				&.w6 {flex: 6 6 0;}
-				&.w7 {flex: 7 7 0;}
-				&.w8 {flex: 8 8 0;}
-				&.w9 {flex: 9 9 0;}
-				////
-				padding-left:  2px;
-				padding-right: 2px;
-				&:nth-child(1) {
-					padding-left: 0;
-				}
-				&:nth-last-child(1) {
-					padding-right: 0;
-				}
-			}
-		}
-		// }}}
-	// }}}
-	.sm-menu // {{{
-		> div
-			width:  100%
-			height: 1em
-			display: flex
-			flex-direction: row
-			> button
-				width:  auto
-				height: 100%
-				padding: 0.2em
-				display: flex
-				flex-direction: column
-				align-items: stretch
-				justify-content: center
-				> hr
-					height: 4px
-					margin: 0
-		////
-		> .menu
-			// не стандартный список
-			flex: 1 1 auto;
-			display: flex;
-			list-style: none;
-			margin: 0;
-			height: 100%;
-			box-sizing: border-box;
-			// нестандартные ссылки
-			a
-				display: flex;
-				text-decoration: none;
-				white-space: nowrap;
-			// контейнер корневого элемента
-			> li
-				position: relative;
-				display: flex;
-				flex-direction: column;
-				justify-content: flex-end;
-				align-items: center;
-				padding: 0 0 0 12px;
-				// корневой элемент
-				> a
-					flex: 1 1 100%;
-					padding: 0 4px;
-					color: black;
-					//align-items: center;
-					// наименование
-					> div
-						display: flex;
-						align-items: center;
-						font-family: 'RistrettoPro';
-						font-size: 1.6em;
-						padding: 0;
-					// иконка выпадающего списка (скрыта по-умолчанию)
-					> svg
-						width: 0;
-						height: auto;
-					&::after
-						display: none;
-				&.current-menu-item > a,
-				&.current-menu-ancestor > a
-					> div
-						font-size: 2em;
-						font-weight: bold;
-				&.menu-item-has-children > a > svg
-					width: 20px;
-				// линия под элементом для анимации наведения и
-				// индикации активного статуса выпадающего меню
-				> hr
-					visibility: hidden;
-					margin: 0;
-					width: 100%;
-					height: 5px;
-					background-color: rgba(var(--sm-color-6));
-				&.current-menu-item > hr,
-				&.current-menu-ancestor > hr
-					visibility: visible;
-				// выпадающее меню
-				> .dropdown
-					position: absolute;
-					left: -8px;
-					top: calc(100% + 2px);
-					width: 380px;
-					padding: 8px 10px;
-					background-color: @color-layer;
-					border-radius: 4px;
-					border: 1px solid rgba(var(--sm-color-6));
-					visibility: hidden;
-					opacity: 0;
-					z-index: 100;
-					// ссылка
-					> a
-						display: flex;
-						align-items: center;
-						padding: 0 0 0 8px;
-						background-color: transparent;
-						border-radius: 2px;
-						height: 2.4em;
-						// отступ для элементов выше 1-ого уровня
+					padding: 0
+					> input // {{{
+						font-size: 0.4em
+						width:  100%
+						height: 100%
+						padding: 0.4em 0.2em 0.4em 0.4em
+						border: 1px solid rgba(var(--sm-color-5))
+						border-radius: 4px
+						font-family: var(--sm-font-input)
+						background-color: rgba(var(--sm-color-1), 0.4)
+						color: rgba(var(--sm-color-0))
+						outline: none
+						&:placeholder
+							color: rgba(var(--sm-color-4))
+						&:focus::placeholder
+							color: transparent
+						&:focus
+							border: 3px solid rgba(var(--sm-color-5))
+					// }}}
+					> button // {{{
+						font-size: var(--height)
+						width:  1.1em
+						height: calc(100% - 4px)
+						padding: 0.1em 0.2em 0.1em 0.3em
+						border: 0
+						border-top-right-radius: 2px
+						border-bottom-right-radius: 2px
+						background-color: rgba(var(--sm-color-5))
+						position: absolute
+						top:   2px
+						right: 2px
+						cursor: pointer
 						> svg
-							//display: block;
-							padding: 0;
-							height: 18px;
-							//fill: white;
-						// текст
-						> div
-							font-family: 'RistrettoPro';
-							font-size: 1.6em;
-							padding: 0;
-							color: black;
-						// состояния:
-						// наведен
-						&:hover,
-						&.hovered
-							background-color: rgba(var(--sm-color-6), 0.125);
-							> div
-								color: rgba(var(--sm-color-6));
-								font-size: 1.7em;
-						// выбран
-						&.current-menu-item
-							> div
-								letter-spacing: 0.05em;
-								font-weight: bold;
-								color: rgba(var(--sm-color-6));
-					// заголовок уровня
-					> h3
-						font-family: 'RistrettoPro';
-						font-size: 1.7em;
-						font-weight: bold;
-						color: black;
-						margin: 0;
-						padding: 0 0 0 8px;
+							width:  auto
+							height: 100%
+							fill: rgba(var(--sm-color-1))
+						&.o
+							border-right: 0
+							border-top-right-radius: 0
+							border-bottom-right-radius: 0
+						&.x
+							border-left: 0
+							border-top-left-radius: 0
+							border-bottom-left-radius: 0
+					// }}}
+			// }}}
+			> .c // {{{
+				flex: 0 0 auto
+			// }}}
 	// }}}
-	.sm-minicart // {{{
-		flex: 0 1 auto;
-		display: flex;
-		align-items: center;
-		padding-left: 8px;
-		// ссылка
-		> a
-			display: flex;
-			align-items: center;
-			//outline: none;
-			// контейнер
-			> div
-				position: relative;
-				padding: 8px;
-				cursor: pointer;
-				// иконка
-				> svg
-					height: 40px;
-					fill: black;
-				// количество
-				> div
-					position: absolute;
-					top: 0;
-					right: 0;
-					width: 20px;
-					height: 20px;
-					> span
-						display: block;
-						background-color: rgba(var(--sm-color-6));
-						border-radius: 100%;
-						line-height: 20px;
-						text-align: center;
-						color: white;
-						font-size: 12px;
-						font-weight: bold;
-						&.hidden
-							visibility: hidden;
-			// общая сумма
-			> span
-				color: black;
-				font-weight: bold;
-		&.is-current
-			> a
-				cursor: default
-				> div
-					> svg
-						fill: rgba(var(--sm-color-6))
-					> div
-						visibility: hidden
-				> span
-					display: none
+	> .sm-blocks.menu // {{{
+		flex: 1 1 auto
+		--root-size: 0.75em
+		padding: 8px 24px
+		background-color: rgba(var(--sm-color-3), 0.2)
+		.label
+			font-family: Montserrat
+			font-size: 0.5em
 	// }}}
-	> .head // {{{
-		padding: 0 8px 0 8px
-		display: block
-		overflow: visible // to display menu dropdowns
+	> .sep // {{{
+		flex: 0 0 0
+		height: 4px
+		background-color: rgba(var(--sm-color-3))
+		border: 0
+		border-radius: 4px
+	// }}}
+	> .body // {{{
+		//flex: 1 1 auto
+		padding: 32px 24px 16px 24px
+		box-sizing: border-box
+		//font-size: calc(var(--sm-size-height) * var(--sm-size-factor))
 		> div
 			width: 100%
+	// }}}
+#search
+	> .list // {{{
+		> .product
 			display: flex
 			flex-direction: row
-		> .a // {{{
-			> .linkbox
+			height: 52px
+			padding: 4px
+			cursor: pointer
+			> .a
 				flex: 0 0 0
-				min-width:  2.25em
-				min-height: 2.25em
-				padding: 0.25em
-			> .searchbox
+				min-width: 48px
+				> img
+					width:  100%
+					height: 100%
+			> .b
 				flex: 1 1 0
-				padding-top: 0.35em
+				padding-left: 12px
+				display: flex
+				flex-direction: row
+				align-items: center
 				overflow: hidden
-				> form
-					position: relative
-					display: flex
-					flex-direction: row
-					align-items: stretch
-					gap: 2px
-					> .inputbox
-						position: relative
-						height: 1em
-						padding: 0
-						> svg
-							width:  1em
-							height: 1em
-							padding: 0.2em
-							position: absolute
-							top:  0
-							left: 0
-							fill: rgba(var(--sm-color-3))
-						> input
-							padding-left: var(--height)
-							&:focus::placeholder
-								color: transparent
-					> button
-						font-size: var(--height)
-						width:  1em
-						height: 100%
-						padding: 0.2em
-						position: absolute
-						top:   0
-						right: 0
-						display: none
-						background-color: transparent
-						> svg
-							width:  100%
-							height: 100%
-							fill: rgba(var(--sm-color-3))
-						&.v
-							display: block
-				> div
-					display: flex
-					flex-direction: row
-					justify-content: flex-end
-					padding-right: 2%
-					> .linkbox
-						width:  0.8em
-						height: 0.8em
-						padding: 0.1em
-		// }}}
-		> .b // {{{
-			width:  100%
-			height: auto
+				font-size: 14px
+				font-family: var(--sm-font-label)
+			> .c
+				flex: 0 0 auto
+				display: flex
+				flex-direction: row
+				align-items: center
+				font-size: 16px
+				font-family: var(--sm-font-input)
+			&:hover
+				background-color: rgba(var(--sm-color-3))
+	// }}}
+	> nav > div > ul // {{{
+		padding: 16px 0 0 0
+		margin:  0
+		display: flex
+		flex-direction: row
+		//justify-content: center
+		justify-content: flex-end
+		list-style: none
+		gap: 2px
+		> li
+			flex: 0 0 auto
+			min-width: 48px
+			height: 48px
+			padding: 0 8px 0 8px
 			display: flex
-			flex-direction: row
-			> .sm-menu
-				flex: 1 1 0
-			> .sm-minicart
-				flex: 0 0 0
-		// }}}
-		> .c // {{{
-			width:  100%
-			height: 8px
+			align-items: center
+			justify-content: center
+			box-sizing: border-box
 			background-color: rgba(var(--sm-color-3))
-		// }}}
+			border: 1px solid rgba(var(--sm-color-4))
+			border-radius: 4px
+			font-family: var(--sm-font-input)
+			> span,
+			> a
+				font-size: 24px
+				box-sizing: border-box
+				text-decoration: none
+	// }}}
+	&.x // {{{
+		pointer-events: none
+		> .list > .product
+			opacity: 0.25
+			&.x
+				opacity: 1
+				background-color: rgba(var(--sm-color-3))
+		> nav
+			opacity: 0.25
+	// }}}
+#product
+	> div // {{{
+		color: darkslategray
 	// }}}
 ////
