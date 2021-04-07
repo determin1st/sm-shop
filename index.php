@@ -42,6 +42,7 @@
     {
       # front page
       # ...
+      echo 'FRONT PAGE';
     }
     include $path.'footer.inc';
   }

@@ -46,9 +46,7 @@ class StorefrontModern {
     # }}}
     $styles = [ # {{{
       'index'   => ['sm-blocks'],
-      'auth'    => ['sm-index'],
       'catalog' => ['sm-index'],
-      'cart'    => ['sm-index'],
     ];
     # }}}
   public static
@@ -58,7 +56,7 @@ class StorefrontModern {
       'Bender-Bold.woff2',
     ];
     # }}}
-  public
+  private
     $BRAND = 'sm-shop',
     $URI   = '',# URI of the theme
     $LANG  = '',# current language
@@ -77,7 +75,8 @@ class StorefrontModern {
   # }}}
   # constructor {{{
   private function __construct() {
-    # check requirements {{{
+    # after theme setup
+    # CHECK requirements {{{
     global $wp_version;
     $I = $this;
     if (version_compare('7.4', phpversion(), '>'))
@@ -101,104 +100,14 @@ class StorefrontModern {
       return;
     }
     # }}}
-    # initialize {{{
-    # after theme setup
+    # REGISTER files {{{
+    # prepare
     $I->URI  = get_stylesheet_directory_uri();
     $I->LANG = substr(get_locale(), 0, 2);
     $I->isLoggedIn  = is_user_logged_in();
     $I->isAdmin     = is_admin();
     $I->isGutenberg = function_exists('register_block_type');
-    add_action('parse_query', function() use ($I)
-    {
-      # after wordpress is ready
-      $I->inCustomizer = is_customize_preview();
-      #$I->inAccountPage = is_account_page();
-      #$I->inFrontPage   = is_front_page();
-      $I->inCart    = is_cart();
-      $I->inProduct = (is_product() || is_product_category() || is_product_tag());
-      $I->inShop    = is_shop();
-      # determine page template
-      if (!$I->isLoggedIn) {
-        $I->PAGE = 'auth';
-      }
-      else
-      {
-        $I->isExclusive = false;
-        if ($I->inShop) {
-          $I->PAGE = 'catalog';
-        }
-        else if (is_search())
-        {
-          $I->PAGE = 'search';
-          add_action('pre_get_posts', function ($query) {
-            # configure search query
-            $query->set('posts_per_page', 16);
-          }, 1);
-        }
-        else if (is_product()) {
-          $I->PAGE = 'product';
-        }
-        else if ($I->inCart) {
-          $I->PAGE = 'cart';
-        }
-        else {
-          $I->PAGE = 'index';
-        }
-      }
-      # set enqueue hook
-      add_action('wp_enqueue_scripts', function() use ($I)
-      {
-        # set page style
-        if (array_key_exists($I->PAGE, $I::$styles)) {
-          wp_enqueue_style('sm-'.$I->PAGE);
-        }
-        else if (!$I->isExclusive) {
-          wp_enqueue_style('sm-index');
-        }
-        # set page script
-        if ($I->isExclusive)
-        {
-          if (array_key_exists($I->PAGE, $I::$scripts)) {
-            wp_enqueue_script('sm-'.$I->PAGE);
-          }
-        }
-        else
-        {
-          wp_enqueue_script('sm-index');
-          wp_add_inline_script(
-            'sm-index',
-            'SM().init(document,'.StorefrontModernBlocks::config($I->BRAND).');'
-          );
-        }
-      });
-      /***
-      global $wp_query;
-      ###
-      # инициализация параметров блога
-      # определим идентификатор основной страницы блога
-      while (($a = get_option('page_for_posts')) !== false)
-      {
-        # сохраняем как число
-        $this->wp_blog_id = $a = intval($a);
-        # определим идентификатор текущего объекта
-        if (($b = $wp_query->get_queried_object_id()) === 0) {
-          break;
-        }
-        # получаем данные
-        if (($b = get_post($b)) === null) {
-          break;
-        }
-        # определим является ли объект постом блога
-        if ($b->ID !== $a && $b->post_type === 'post') {
-          $this->wp_blog_active = true;
-        }
-        break;
-      }
-      /***/
-    });
-    # }}}
-    # register {{{
-    # fonts
+    # set font URLs
     foreach (self::$fonts as &$a) {
       $a = $I->URI.'/inc/fonts/'.$a;
     }
@@ -238,8 +147,10 @@ class StorefrontModern {
       : $I->BRAND.'primary menu';
     register_nav_menus($a);
     # }}}
-    # add features {{{
+    # SET features {{{
     #add_theme_support('woocommerce');
+    #add_theme_support('editor-styles');
+    #add_editor_style('inc/admin-editor.css');
     /***
     add_theme_support('woocommerce', [
       'thumbnail_image_width' => 150,
@@ -254,8 +165,6 @@ class StorefrontModern {
       ],
     ]);
     /***/
-    #add_theme_support('editor-styles');
-    #add_editor_style('inc/admin-editor.css');
     ###
     # <iframe> lazy loading
     add_filter('embed_oembed_html', function($html)
@@ -299,105 +208,205 @@ class StorefrontModern {
       return true;
     }, 10, 2);
     # }}}
-    # tune wordpress {{{
-    # disable rss-feed in <head>
-    remove_action('wp_head', 'feed_links', 2);
-    remove_action('wp_head', 'feed_links_extra', 3);
-    # disable DNS-prefetch
-    remove_action('wp_head', 'wp_resource_hints', 2);
-    # disable XMLRPC
-    add_filter('xmlrpc_enabled', '__return_false');
-    remove_action('wp_head', 'rsd_link');
-    # disable Windows Live Writer Manifest Link
-    remove_action('wp_head', 'wlwmanifest_link');
-    # disable shortlink
-    remove_action('wp_head', 'wp_shortlink_wp_head');
-    # disable wordpress info markers (fingerprint)
-    remove_action('wp_head', 'wp_generator');
-    add_filter('the_generator', '__return_empty_string');
-    # disable emoji
-    remove_action('wp_head', 'print_emoji_detection_script', 7);
-    remove_action('embed_head', 'print_emoji_detection_script');
-    remove_action('wp_print_styles', 'print_emoji_styles');
-    remove_action('admin_print_scripts', 'print_emoji_detection_script');
-    remove_action('admin_print_styles', 'print_emoji_styles');
-    remove_filter('the_content_feed', 'wp_staticize_emoji');
-    remove_filter('comment_text_rss', 'wp_staticize_emoji');
-    remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
-    # remove admin-bar
-    show_admin_bar(false);
-    /***
-    add_action('wp_enqueue_scripts', function() use ($I) {
-      # "bump" and "print" inline-styles
-      remove_action('wp_head', '_admin_bar_bump_cb');
-      remove_action('wp_head', 'wp_admin_bar_header');
-      # standard style and script
-      wp_dequeue_style('admin-bar');
-      wp_dequeue_script('admin-bar');
-    });
-    /***/
-    ###
-    # Отключаем принудительную проверку новых версий WP,
-    # плагинов и темы в админке, чтобы она не тормозила,
-    # когда долго не заходил и зашел... Все проверки будут происходить
-    # незаметно через крон или при заходе на страницу: Консоль -> Обновления
-    #
-    # @see https://wp-kama.ru/filecode/wp-includes/update.php
-    # @author Kama (https://wp-kama.ru)
-    # @version 1.0
-    ###
-    if ($I->isAdmin)
-    {
-      // отключим проверку обновлений при любом заходе в админку...
-      remove_action('admin_init', '_maybe_update_core');
-      remove_action('admin_init', '_maybe_update_plugins');
-      remove_action('admin_init', '_maybe_update_themes');
-      // отключим проверку обновлений при заходе на специальную страницу в админке...
-      remove_action('load-plugins.php', 'wp_update_plugins');
-      remove_action('load-themes.php', 'wp_update_themes');
-      // оставим принудительную проверку при заходе на страницу обновлений...
-      //remove_action( 'load-update-core.php', 'wp_update_plugins' );
-      //remove_action( 'load-update-core.php', 'wp_update_themes' );
-      // внутренняя страница админки "Update/Install Plugin" или "Update/Install Theme" - оставим не мешает...
-      //remove_action( 'load-update.php', 'wp_update_plugins' );
-      //remove_action( 'load-update.php', 'wp_update_themes' );
-      // событие крона не трогаем, через него будет проверяться наличие обновлений - тут все отлично!
-      //remove_action( 'wp_version_check', 'wp_version_check' );
-      //remove_action( 'wp_update_plugins', 'wp_update_plugins' );
-      //remove_action( 'wp_update_themes', 'wp_update_themes' );
+    add_action('init', function() use ($I) {
+      # UNSET features {{{
+      global $wp;
+      # rss-feed in <head>
+      remove_action('wp_head', 'feed_links', 2);
+      remove_action('wp_head', 'feed_links_extra', 3);
+      # DNS-prefetch
+      remove_action('wp_head', 'wp_resource_hints', 2);
+      # XMLRPC
+      add_filter('xmlrpc_enabled', '__return_false');
+      remove_action('wp_head', 'rsd_link');
+      # Windows Live Writer Manifest Link
+      remove_action('wp_head', 'wlwmanifest_link');
+      # shortlink
+      remove_action('wp_head', 'wp_shortlink_wp_head');
+      # wordpress info markers (fingerprint)
+      remove_action('wp_head', 'wp_generator');
+      add_filter('the_generator', '__return_empty_string');
+      # emoji
+      remove_action('wp_head', 'print_emoji_detection_script', 7);
+      remove_action('embed_head', 'print_emoji_detection_script');
+      remove_action('wp_print_styles', 'print_emoji_styles');
+      remove_action('admin_print_scripts', 'print_emoji_detection_script');
+      remove_action('admin_print_styles', 'print_emoji_styles');
+      remove_filter('the_content_feed', 'wp_staticize_emoji');
+      remove_filter('comment_text_rss', 'wp_staticize_emoji');
+      remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
+      # admin-bar (also incudes "bump" and "print" inline-styles)
+      #show_admin_bar(false);
       ###
-      # отключим проверку необходимости обновить браузер в консоли,
-      # мы всегда юзаем топовые браузеры!
-      # эта проверка происходит раз в неделю...
-      #
-      # @see https://wp-kama.ru/function/wp_check_browser_version
+      # wp embeds (embedding other wp blogs)
+      # query var
+      $wp->public_query_vars = array_diff($wp->public_query_vars, ['embed']);
+      # oembed/1.0/embed REST route and
+      # handling of internal embeds in oembed/1.0/proxy REST route
+      add_filter('rest_endpoints', function ($endpoints) {
+        unset($endpoints['/oembed/1.0/embed']);
+        return $endpoints;
+      });
+      add_filter('oembed_response_data', function ($data) {
+        if (defined('REST_REQUEST') && REST_REQUEST) {
+          return false;
+        }
+        return $data;
+      });
+      # oEmbed auto discovery
+      add_filter('embed_oembed_discover', '__return_false');
+      remove_filter('oembed_dataparse', 'wp_filter_oembed_result', 10);
+      remove_action('wp_head', 'wp_oembed_add_discovery_links');
+      remove_filter('pre_oembed_result', 'wp_filter_pre_oembed_result', 10);
+      # oEmbed-specific JavaScript
+      remove_action('wp_head', 'wp_oembed_add_host_js');
       ###
-      add_filter('pre_site_transient_browser_'.md5($_SERVER['HTTP_USER_AGENT']), '__return_true');
-      ###
-      # disable superficial menu options
-      add_action('admin_menu', function()
+      if ($I->isAdmin)
       {
-        global $submenu;
-        # more: /wp-admin/menu.php
-        unset($submenu['themes.php'][15]);
-        unset($submenu['themes.php'][20]);
-      }, 999);
-    }
-    # }}}
+        # new wp version checks in admin panel
+        remove_action('admin_init', '_maybe_update_core');
+        remove_action('admin_init', '_maybe_update_plugins');
+        remove_action('admin_init', '_maybe_update_themes');
+        remove_action('load-plugins.php', 'wp_update_plugins');
+        remove_action('load-themes.php', 'wp_update_themes');
+        # wp update pages
+        #remove_action('load-update-core.php', 'wp_update_plugins');
+        #remove_action('load-update-core.php', 'wp_update_themes');
+        #remove_action('load-update.php', 'wp_update_plugins');
+        #remove_action('load-update.php', 'wp_update_themes');
+        # cron checks
+        #remove_action( 'wp_version_check', 'wp_version_check' );
+        #remove_action( 'wp_update_plugins', 'wp_update_plugins' );
+        #remove_action( 'wp_update_themes', 'wp_update_themes' );
+        ###
+        # superficial menu options
+        add_action('admin_menu', function() {
+          global $submenu;
+          # more: /wp-admin/menu.php
+          unset($submenu['themes.php'][15]);
+          unset($submenu['themes.php'][20]);
+        }, 999);
+      }
+      else
+      {
+        # jquery and deps
+        wp_deregister_script('jquery');
+        # woo enqueues 3 stylesheets by default
+        add_filter('woocommerce_enqueue_styles', '__return_empty_array');
+        # block editor (aka gutenberg)
+        wp_deregister_style('wp-block-library');
+        wp_deregister_style('wp-block-library-theme');
+        wp_deregister_style('wc-block-style');
+        # user gravatar icon
+        add_filter('user_profile_picture_description', '__return_empty_string');
+        add_filter('get_avatar', function($content, $id_or_email, $size='', $default='') {
+          return (strpos($content, 'gravatar.com') === false)
+            ? $content : '';
+        }, 1, 5);
+      }
+      # browser telemetry (what a heck!?)
+      add_filter('pre_site_transient_browser_'.md5($_SERVER['HTTP_USER_AGENT']), '__return_true');
+      # }}}
+      add_action('parse_query', function() use ($I) {
+        # INITIALIZE route {{{
+        $I->inCustomizer = is_customize_preview();
+        #$I->inAccountPage = is_account_page();
+        #$I->inFrontPage   = is_front_page();
+        $I->inCart    = is_cart();
+        $I->inProduct = (is_product() || is_product_category() || is_product_tag());
+        $I->inShop    = is_shop();
+        ###
+        if (!$I->isLoggedIn) {
+          $I->PAGE = 'auth';
+        }
+        else
+        {
+          $I->isExclusive = false;
+          if ($I->inShop) {
+            $I->PAGE = 'catalog';
+          }
+          else if (is_search())
+          {
+            $I->PAGE = 'search';
+            add_action('pre_get_posts', function ($query) {
+              # configure search query
+              $query->set('posts_per_page', 16);
+            }, 1);
+          }
+          else if (is_product()) {
+            $I->PAGE = 'product';
+          }
+          else if ($I->inCart) {
+            $I->PAGE = 'cart';
+          }
+          else {
+            $I->PAGE = 'index';
+          }
+        }
+        /***
+        global $wp_query;
+        ###
+        # инициализация параметров блога
+        # определим идентификатор основной страницы блога
+        while (($a = get_option('page_for_posts')) !== false)
+        {
+          # сохраняем как число
+          $this->wp_blog_id = $a = intval($a);
+          # определим идентификатор текущего объекта
+          if (($b = $wp_query->get_queried_object_id()) === 0) {
+            break;
+          }
+          # получаем данные
+          if (($b = get_post($b)) === null) {
+            break;
+          }
+          # определим является ли объект постом блога
+          if ($b->ID !== $a && $b->post_type === 'post') {
+            $this->wp_blog_active = true;
+          }
+          break;
+        }
+        /***/
+        # }}}
+        add_action('wp_enqueue_scripts', function() use ($I) {
+          # ACTIVATE handlers  {{{
+          # set styles
+          wp_enqueue_style('sm-index');
+          if (array_key_exists($I->PAGE, $I::$styles) &&
+              strcmp($I->PAGE, 'index'))
+          {
+            wp_enqueue_style('sm-'.$I->PAGE);
+          }
+          # set scripts
+          if ($I->isExclusive)
+          {
+            if (array_key_exists($I->PAGE, $I::$scripts)) {
+              wp_enqueue_script('sm-'.$I->PAGE);
+            }
+          }
+          else
+          {
+            wp_enqueue_script('sm-index');
+            wp_add_inline_script(
+              'sm-index',
+              'SM().init(document,'.StorefrontModernBlocks::config($I->BRAND).');'
+            );
+          }
+          # }}}
+        });
+      });
+    });
   }
   # }}}
   # api {{{
-  public static function init()
-  {
-    if (self::$I === null) {
-      self::$I = new StorefrontModern();
-    }
+  public static function init() {
+    if (!self::$I) {self::$I = new StorefrontModern();}
   }
   public static function error()      {return self::$I->ERROR;}
   public static function page()       {return self::$I->PAGE;}
   public static function exclusive()  {return self::$I->isExclusive;}
   # }}}
-  # TODO {{{
+  # helpers {{{
   # multi-domain {{{
   private function enableMultiDomainConfig()
   {
@@ -416,7 +425,6 @@ class StorefrontModern {
     ###
     # incorporate domain style class into <body>
     add_filter('body_class', function($c) {
-      # {{{
       # replace all special characters with hyphens
       $a = str_replace('.', '-', $_SERVER['HTTP_HOST']);
       $a = str_replace(':', '-', $a);
@@ -425,7 +433,6 @@ class StorefrontModern {
         $c[] = strtolower($a);
       }
       return $c;
-      # }}}
     });
   }
   # }}}

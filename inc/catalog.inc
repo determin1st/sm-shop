@@ -30,12 +30,13 @@
           <!-- :sm-blocks/category-filter {"baseCategory":"37"} /-->
         </div>
       </div>
-      <!--
+      <!--//-->
+
       {{#sm-products}}
         "wrap-around": false,
         "order":       [1,'price'],
       {{/sm-products}}
-      /-->
+
       <!-- wp:sm-blocks/products {
 
         "layout":"4:2:1:0",

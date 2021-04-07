@@ -63,7 +63,7 @@ ob_start();
   </div>
 </div>
 </div>
-{{menu}}
+{{sm-menu}}
 
 <?php
 echo StorefrontModernBlocks::parse(ob_get_clean(), [
@@ -72,7 +72,7 @@ echo StorefrontModernBlocks::parse(ob_get_clean(), [
   'search_label' => 'поиск товара..',
   'search_query' => get_search_query(),
   'contact_telegram' => 'https://t.me/sm_blocks',
-  'menu'         => StorefrontModernBlocks::render('menu'),
+  #'menu'         => StorefrontModernBlocks::render('menu'),
   'cart_url'     => wc_get_cart_url(),
 ]);
 ?>

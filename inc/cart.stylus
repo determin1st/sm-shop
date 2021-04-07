@@ -1,8 +1,0 @@
-#cart
-	//font-size: calc(var(--sm-size-height) * var(--sm-size-factor))
-	width: 100%
-	padding: 0 12px 32px 12px
-	> h1
-		font-size: 72px
-		font-family: Kazmann
-///
