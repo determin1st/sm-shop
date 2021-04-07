@@ -235,8 +235,6 @@ class StorefrontModern {
       remove_filter('the_content_feed', 'wp_staticize_emoji');
       remove_filter('comment_text_rss', 'wp_staticize_emoji');
       remove_filter('wp_mail', 'wp_staticize_emoji_for_email');
-      # admin-bar (also incudes "bump" and "print" inline-styles)
-      #show_admin_bar(false);
       ###
       # wp embeds (embedding other wp blogs)
       # query var
@@ -303,6 +301,8 @@ class StorefrontModern {
           return (strpos($content, 'gravatar.com') === false)
             ? $content : '';
         }, 1, 5);
+        # admin-bar (also incudes "bump" and "print" inline-styles)
+        show_admin_bar(false);
       }
       # browser telemetry (what a heck!?)
       add_filter('pre_site_transient_browser_'.md5($_SERVER['HTTP_USER_AGENT']), '__return_true');
