@@ -32,17 +32,8 @@
       </div>
       <!--//-->
 
-      {{#sm-products}}
-        "wrap-around": false,
-        "order":       [1,'price'],
-      {{/sm-products}}
+      {{products}}
 
-      <!-- wp:sm-blocks/products {
-
-        "layout":"4:2:1:0",
-        "wrapAround":false
-
-      } /-->
       <div class="sep"><hr /></div>
     </div>
 

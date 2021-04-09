@@ -1,5 +1,6 @@
 <?php
-class StorefrontModern {
+namespace StorefrontModern;
+class Shop {
   # data {{{
   private static
     $I = null,# singleton instance
@@ -94,7 +95,7 @@ class StorefrontModern {
       $I->ERROR = 'WooCommerce plugin required';
       return;
     }
-    if (!class_exists('StorefrontModernBlocks', false))
+    if (!class_exists('\StorefrontModern\Blocks', false))
     {
       $I->ERROR = 'sm-blocks plugin required';
       return;
@@ -302,7 +303,7 @@ class StorefrontModern {
             ? $content : '';
         }, 1, 5);
         # admin-bar (also incudes "bump" and "print" inline-styles)
-        show_admin_bar(false);
+        #show_admin_bar(false);
       }
       # browser telemetry (what a heck!?)
       add_filter('pre_site_transient_browser_'.md5($_SERVER['HTTP_USER_AGENT']), '__return_true');
@@ -389,7 +390,7 @@ class StorefrontModern {
             wp_enqueue_script('sm-index');
             wp_add_inline_script(
               'sm-index',
-              'SM().init(document,'.StorefrontModernBlocks::config($I->BRAND).');'
+              'SM().init(document,'.Blocks::config($I->BRAND).');'
             );
           }
           # }}}
@@ -397,16 +398,14 @@ class StorefrontModern {
       });
     });
   }
-  # }}}
-  # api {{{
   public static function init() {
-    if (!self::$I) {self::$I = new StorefrontModern();}
+    if (!self::$I) {self::$I = new Shop();}
   }
+  # }}}
+  # helpers {{{
   public static function error()      {return self::$I->ERROR;}
   public static function page()       {return self::$I->PAGE;}
   public static function exclusive()  {return self::$I->isExclusive;}
-  # }}}
-  # helpers {{{
   # multi-domain {{{
   private function enableMultiDomainConfig()
   {
@@ -460,7 +459,7 @@ class StorefrontModern {
 if (defined('ABSPATH') || function_exists('add_action'))
 {
   add_action('after_setup_theme', function() {
-    StorefrontModern::init();
+    Shop::init();
   });
 }
 # }}}

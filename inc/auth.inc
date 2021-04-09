@@ -117,7 +117,7 @@ do_action('woocommerce_before_customer_login_form');
 <?php
 do_action('woocommerce_after_customer_login_form');
 # }}}
-echo StorefrontModernBlocks::parse(ob_get_clean(), [
+echo \StorefrontModern\Blocks::parse(ob_get_clean(), [
   'title'    => ($isRegActive ? __('Register', 'woocommerce') : __('Login', 'woocommerce')),
   'variant'  => ($isRegActive ? 'b' : 'a'),
   'login'    => $loginForm,
