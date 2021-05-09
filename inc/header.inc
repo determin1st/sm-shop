@@ -67,7 +67,7 @@ ob_start();
 {{menu}}
 
 <?php
-echo \StorefrontModern\Blocks::parse(ob_get_clean(), [
+echo \SM\Blocks::parse(ob_get_clean(), [
   'home_url'     => esc_url(home_url('/')),
   'logout_url'   => wp_logout_url('/'),
   'search_label' => 'поиск товара..',

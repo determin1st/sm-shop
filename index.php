@@ -6,7 +6,7 @@
   <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
   <?php
   # {{{
-  foreach (\StorefrontModern\Shop::$fonts as $a) {
+  foreach (\SM\Shop::$fonts as $a) {
     echo '<link rel="preload" href="'.$a.'" as="font" type="font/woff2" crossorigin>';
   }
   wp_head();
@@ -19,9 +19,9 @@
   # prepare
   wp_body_open();
   $path = __DIR__.DIRECTORY_SEPARATOR.'inc'.DIRECTORY_SEPARATOR;
-  $page = \StorefrontModern\Shop::page();
+  $page = \SM\Shop::page();
   # output
-  if (\StorefrontModern\Shop::exclusive())
+  if (\SM\Shop::exclusive())
   {
     # exclusive
     include $path.$page.'.inc';
@@ -33,7 +33,7 @@
     include $path.'header.inc';
     include $path.$page.'.inc';
     include $path.'footer.inc';
-    echo \StorefrontModern\Blocks::parse(ob_get_clean());
+    echo \SM\Blocks::parse(ob_get_clean());
   }
   wp_footer();
   # }}}

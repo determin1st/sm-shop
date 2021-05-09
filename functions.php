@@ -1,5 +1,5 @@
 <?php
-namespace StorefrontModern;
+namespace SM;
 class Shop {
   # data {{{
   private static
@@ -95,7 +95,7 @@ class Shop {
       $I->ERROR = 'WooCommerce plugin required';
       return;
     }
-    if (!class_exists('\StorefrontModern\Blocks', false))
+    if (!class_exists('\SM\Blocks', false))
     {
       $I->ERROR = 'sm-blocks plugin required';
       return;
@@ -303,7 +303,7 @@ class Shop {
             ? $content : '';
         }, 1, 5);
         # admin-bar (also incudes "bump" and "print" inline-styles)
-        #show_admin_bar(false);
+        show_admin_bar(false);
       }
       # browser telemetry (what a heck!?)
       add_filter('pre_site_transient_browser_'.md5($_SERVER['HTTP_USER_AGENT']), '__return_true');
