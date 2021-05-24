@@ -40,14 +40,23 @@ class Shop {
       ###
     ],
     # }}}
-    $scripts = [ # {{{
+    $scripts = [ # sm-script:deps {{{
       'index' => ['sm-blocks'],
       'auth'  => ['sm-index'],
     ],
     # }}}
-    $styles = [ # {{{
+    $styles = [ # sm-style:deps {{{
       'index'   => ['sm-blocks'],
       'catalog' => ['sm-index'],
+    ],
+    # }}}
+    $pages = [ # page:[is_exclusive,has_blocks] {{{
+      'index'   => [0,1],
+      'auth'    => [1,0],
+      'catalog' => [0,1],
+      'search'  => [0,1],
+      'product' => [0,1],
+      'cart'    => [0,1],
     ];
     # }}}
   public static
@@ -58,12 +67,14 @@ class Shop {
     ];
     # }}}
   private
-    $BRAND = 'sm-shop',
-    $URI   = '',# URI of the theme
-    $LANG  = '',# current language
-    $ERROR = '',# fatal message
-    $PAGE  = 'error',# current page
+    $BRAND  = 'sm-shop',
+    $INCDIR = '',
+    $URI    = '',# URI of the theme
+    $LANG   = '',# current language
+    $ERROR  = '',# fatal message
+    $PAGE   = 'error',# current page
     ###
+    $isWordpress  = true,
     $isExclusive  = true,
     $isLoggedIn   = false,
     $isAdmin      = false,
@@ -74,12 +85,21 @@ class Shop {
     $inProduct    = false,
     $inShop       = false;
   # }}}
-  # constructor {{{
-  private function __construct() {
+  # initializer {{{
+  public static function init($isWordpress = true)
+  {
+    if (!self::$I) {# private singleton
+      self::$I = new Shop($isWordpress);
+    }
+  }
+  private function __construct($isWordpress) {
     # after theme setup
-    # CHECK requirements {{{
+    # PREPARE and CHECK requirements {{{
     global $wp_version;
     $I = $this;
+    $I->isWordpress = $isWordpress;
+    $I->INCDIR = __DIR__.DIRECTORY_SEPARATOR.'inc'.DIRECTORY_SEPARATOR;
+    ###
     if (version_compare('7.4', phpversion(), '>'))
     {
       $I->ERROR = 'newer PHP version required';
@@ -108,11 +128,6 @@ class Shop {
     $I->isLoggedIn  = is_user_logged_in();
     $I->isAdmin     = is_admin();
     $I->isGutenberg = function_exists('register_block_type');
-    # set font URLs
-    foreach (self::$fonts as &$a) {
-      $a = $I->URI.'/inc/fonts/'.$a;
-    }
-    unset($a);
     # external scripts
     # these scripts are separate projects that may be stored
     # locally (same-origin) or remotely (cdn)
@@ -309,20 +324,21 @@ class Shop {
       add_filter('pre_site_transient_browser_'.md5($_SERVER['HTTP_USER_AGENT']), '__return_true');
       # }}}
       add_action('parse_query', function() use ($I) {
-        # INITIALIZE route {{{
+        # INITIALIZE current route {{{
+        # determine instance flags
         $I->inCustomizer = is_customize_preview();
         #$I->inAccountPage = is_account_page();
         #$I->inFrontPage   = is_front_page();
         $I->inCart    = is_cart();
         $I->inProduct = (is_product() || is_product_category() || is_product_tag());
         $I->inShop    = is_shop();
-        ###
+        # determine current page
+        # this is a very dumb (static) routing variant..
         if (!$I->isLoggedIn) {
           $I->PAGE = 'auth';
         }
         else
         {
-          $I->isExclusive = false;
           if ($I->inShop) {
             $I->PAGE = 'catalog';
           }
@@ -334,7 +350,7 @@ class Shop {
               $query->set('posts_per_page', 16);
             }, 1);
           }
-          else if (is_product()) {
+          else if ($I->inProduct) {
             $I->PAGE = 'product';
           }
           else if ($I->inCart) {
@@ -370,42 +386,114 @@ class Shop {
         /***/
         # }}}
         add_action('wp_enqueue_scripts', function() use ($I) {
-          # ACTIVATE handlers  {{{
-          # set styles
-          wp_enqueue_style('sm-index');
-          if (array_key_exists($I->PAGE, $I::$styles) &&
-              strcmp($I->PAGE, 'index'))
-          {
-            wp_enqueue_style('sm-'.$I->PAGE);
+          # wp_head: SCRIPTS and STYLES {{{
+          # check page is determined
+          if (!array_key_exists($I->PAGE, $I::$pages)) {
+            return true;# skip unknown routes
           }
-          # set scripts
-          if ($I->isExclusive)
+          # always enqueue defaults
+          wp_enqueue_style('sm-index');
+          wp_enqueue_script('sm-index');
+          # enqueue page related
+          if ($I->PAGE !== 'index')
           {
+            $a = 'sm-'.$I->PAGE;
+            if (array_key_exists($I->PAGE, $I::$styles)) {
+              wp_enqueue_style($a);
+            }
             if (array_key_exists($I->PAGE, $I::$scripts)) {
-              wp_enqueue_script('sm-'.$I->PAGE);
+              wp_enqueue_script($a);
             }
           }
-          else
+          # when the page uses blocks,
+          # add block initializer with initial configuration
+          if ($I::$pages[$I->PAGE][1])
           {
-            wp_enqueue_script('sm-index');
             wp_add_inline_script(
               'sm-index',
               'SM().init(document,'.Blocks::config($I->BRAND).');'
             );
           }
+          # done
+          return true;
           # }}}
         });
       });
     });
   }
-  public static function init() {
-    if (!self::$I) {self::$I = new Shop();}
+  # }}}
+  # api {{{
+  public static function lang() # {{{
+  {
+    if ($I = self::$I) {
+      echo $I->LANG;
+    }
   }
   # }}}
-  # helpers {{{
-  public static function error()      {return self::$I->ERROR;}
-  public static function page()       {return self::$I->PAGE;}
-  public static function exclusive()  {return self::$I->isExclusive;}
+  public static function head() # {{{
+  {
+    # check
+    if (!($I = self::$I)) {
+      return false;
+    }
+    # pre-cache fonts
+    $html = '';
+    foreach ($I::$fonts as $a)
+    {
+      $html = $html.(
+        '<link rel="preload" href="'.
+        $I->URI.'/inc/fonts/'.$a.
+        '" as="font" type="font/woff2" crossorigin>'
+      );
+    }
+    echo $html;
+    # output wordpress head
+    wp_head();
+    # done
+    return true;
+  }
+  # }}}
+  public static function body() # {{{
+  {
+    # check
+    if (!($I = self::$I)) {
+      return false;
+    }
+    ###
+    wp_body_open();
+    ###
+    if ($I->PAGE)
+    {
+      if ($I::$pages[$I->PAGE][0])
+      {
+        # exclusive (non standard)
+        include $I->INCDIR.$I->PAGE.'.inc';
+      }
+      else
+      {
+        # inclusive (framed blocks)
+        ob_start();
+        include $I->INCDIR.'header.inc';
+        include $I->INCDIR.$I->PAGE.'.inc';
+        include $I->INCDIR.'footer.inc';
+        echo Blocks::parse(ob_get_clean());
+      }
+    }
+    ###
+    wp_footer();
+    ###
+    return true;
+  }
+  # }}}
+  ###
+  public static function error() {
+    return self::$I->ERROR;
+  }
+  public static function page() {
+    return self::$I->PAGE;
+  }
+  # }}}
+  # ? {{{
   # multi-domain {{{
   private function enableMultiDomainConfig()
   {
@@ -454,9 +542,8 @@ class Shop {
   # }}}
   # }}}
 }
-# hookup {{{
-# check wordpress loaded
-if (defined('ABSPATH') || function_exists('add_action'))
+# hookup with wordpress {{{
+if (function_exists('add_action'))
 {
   add_action('after_setup_theme', function() {
     Shop::init();

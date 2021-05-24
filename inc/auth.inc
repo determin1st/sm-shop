@@ -100,7 +100,9 @@ $loginForm = SM\Blocks::parse(ob_get_clean(), [
 # compose
 # {{{
 ob_start();
-do_action('woocommerce_before_customer_login_form');
+echo '<div class="woocommerce-notices-wrapper">';
+wc_print_notices();
+echo '</div>';
 ?>
 
 <div id="auth" class="w3-box {{variant}}">
