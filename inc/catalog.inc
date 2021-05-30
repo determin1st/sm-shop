@@ -19,8 +19,7 @@
     <div class="view">
       <div class="panel">
         <div class="content">
-          <!-- wp:sm-blocks/price-filter {
-          } /-->
+          <!-- wp:sm-blocks/price-filter {} /-->
           <!-- wp:sm-blocks/category-filter {
 
             "hasEmpty":true,

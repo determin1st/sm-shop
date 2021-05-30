@@ -74,7 +74,6 @@ class Shop {
     $ERROR  = '',# fatal message
     $PAGE   = 'error',# current page
     ###
-    $isWordpress  = true,
     $isExclusive  = true,
     $isLoggedIn   = false,
     $isAdmin      = false,
@@ -86,18 +85,17 @@ class Shop {
     $inShop       = false;
   # }}}
   # initializer {{{
-  public static function init($isWordpress = true)
+  public static function init()
   {
     if (!self::$I) {# private singleton
-      self::$I = new Shop($isWordpress);
+      self::$I = new Shop();
     }
   }
-  private function __construct($isWordpress) {
+  private function __construct() {
     # after theme setup
     # PREPARE and CHECK requirements {{{
     global $wp_version;
     $I = $this;
-    $I->isWordpress = $isWordpress;
     $I->INCDIR = __DIR__.DIRECTORY_SEPARATOR.'inc'.DIRECTORY_SEPARATOR;
     ###
     if (version_compare('7.4', phpversion(), '>'))
@@ -242,7 +240,7 @@ class Shop {
       # wordpress info markers (fingerprint)
       remove_action('wp_head', 'wp_generator');
       add_filter('the_generator', '__return_empty_string');
-      # emoji
+      # emoji support
       remove_action('wp_head', 'print_emoji_detection_script', 7);
       remove_action('embed_head', 'print_emoji_detection_script');
       remove_action('wp_print_styles', 'print_emoji_styles');
@@ -356,7 +354,8 @@ class Shop {
           else if ($I->inCart) {
             $I->PAGE = 'cart';
           }
-          else {
+          else
+          {
             $I->PAGE = 'index';
           }
         }
@@ -411,7 +410,7 @@ class Shop {
           {
             wp_add_inline_script(
               'sm-index',
-              'SM().init(document,'.Blocks::config($I->BRAND).');'
+              'SM.init('.Blocks::config($I->BRAND).');'
             );
           }
           # done
