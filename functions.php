@@ -404,14 +404,10 @@ class Shop {
               wp_enqueue_script($a);
             }
           }
-          # when the page uses blocks,
-          # add block initializer with initial configuration
-          if ($I::$pages[$I->PAGE][1])
-          {
-            wp_add_inline_script(
-              'sm-index',
-              'SM.init('.Blocks::config($I->BRAND).');'
-            );
+          # the page with blocks,
+          # must include script initializer (SSR JSON hydration)
+          if ($I::$pages[$I->PAGE][1]) {
+            wp_add_inline_script('sm-index', Blocks::javascript($I->BRAND));
           }
           # done
           return true;
