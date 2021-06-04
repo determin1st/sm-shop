@@ -1,6 +1,4 @@
 arc/
-inc/httpFetch
-inc/gsap
 *.vim
 *.swp
 

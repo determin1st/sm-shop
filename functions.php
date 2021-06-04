@@ -46,7 +46,7 @@ class Shop {
     ],
     # }}}
     $styles = [ # style:deps {{{
-      'index'   => ['sm-blocks'],
+      'index' => ['sm-blocks'],
     ],
     # }}}
     $pages = [ # page:[is_exclusive,has_blocks] {{{
@@ -108,7 +108,7 @@ class Shop {
     }
     if (!class_exists('\SM\Blocks', false))
     {
-      $I->ERROR = 'sm-blocks plugin required';
+      $I->ERROR = 'blocks plugin required';
       return;
     }
     # }}}
