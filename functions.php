@@ -45,9 +45,8 @@ class Shop {
       'auth'  => ['sm-index'],
     ],
     # }}}
-    $styles = [ # sm-style:deps {{{
+    $styles = [ # style:deps {{{
       'index'   => ['sm-blocks'],
-      'catalog' => ['sm-index'],
     ],
     # }}}
     $pages = [ # page:[is_exclusive,has_blocks] {{{
@@ -85,12 +84,6 @@ class Shop {
     $inShop       = false;
   # }}}
   # initializer {{{
-  public static function init()
-  {
-    if (!self::$I) {# private singleton
-      self::$I = new Shop();
-    }
-  }
   private function __construct() {
     # after theme setup
     # PREPARE and CHECK requirements {{{
@@ -146,13 +139,8 @@ class Shop {
       );
     }
     # internal styles
-    foreach (self::$styles as $a => $b)
-    {
-      wp_register_style(
-        'sm-'.$a,
-        $I->URI.'/inc/'.$a.'.css',
-        $b
-      );
+    foreach (self::$styles as $a => $b) {
+      wp_register_style('sm-'.$a, $I->URI.'/inc/'.$a.'.css', $b);
     }
     # navigation menus
     $a = [];
@@ -418,6 +406,9 @@ class Shop {
   }
   # }}}
   # api {{{
+  public static function init() {
+    !self::$I && (self::$I = new Shop());
+  }
   public static function lang() # {{{
   {
     if ($I = self::$I) {
